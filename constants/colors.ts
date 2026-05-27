@@ -1,0 +1,32 @@
+export const Colors = {
+  background: '#0a0f1e',
+  surface: '#131929',
+  surfaceLight: '#1e2940',
+  accent: '#00d4aa',
+  accentDim: '#00d4aa22',
+  accentSecondary: '#4f46e5',
+  warning: '#f59e0b',
+  danger: '#ef4444',
+  success: '#10b981',
+  text: '#f0f4ff',
+  textMuted: '#6b7a99',
+  textDim: '#8892b0',
+  border: '#1e2940',
+  cardGradientStart: '#131929',
+  cardGradientEnd: '#0d1525',
+  heartRate: '#ff4060',
+  calories: '#ff8c00',
+  steps: '#00d4aa',
+  hrv: '#a78bfa',
+  white: '#ffffff',
+  black: '#000000',
+};
+
+export const Gradients = {
+  hero: ['#0a0f1e', '#1a2744'],
+  card: ['#131929', '#0d1525'],
+  accent: ['#00d4aa', '#00a87a'],
+  warm: ['#ff8c00', '#ff4060'],
+  purple: ['#4f46e5', '#7c3aed'],
+  cool: ['#0ea5e9', '#4f46e5'],
+};

@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "FitOver50",
+    "slug": "fitover50",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "scheme": "fitover50",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0a0f1e"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.fitover50.app",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "FitOver50 reads your Apple Watch heart rate, calories, and workout data to personalize your training plan and track your progress.",
+        "NSHealthUpdateUsageDescription": "FitOver50 logs your workout sessions to Apple Health so all your fitness data stays in sync."
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.fitover50.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-health",
+        {
+          "isClinicalDataEnabled": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
