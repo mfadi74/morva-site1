@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Svg, { Path, Circle, Polyline } from 'react-native-svg';
 import { Colors } from '../../constants/colors';
-import { WORKOUT_SESSIONS, WEEK_SCHEDULE } from '../../data/workouts';
+import { WORKOUT_SESSIONS, WEEK_SCHEDULE, getTodaySession } from '../../data/workouts';
 import { WorkoutSessionCard } from '../../components/WorkoutSessionCard';
 import { MetricCard } from '../../components/MetricCard';
 import { ProgressRing } from '../../components/ProgressRing';
@@ -70,14 +70,7 @@ function getGreeting(): string {
   return 'Good evening';
 }
 
-function getTodaySession() {
-  const dayIndex = new Date().getDay(); // 0=Sun,1=Mon...
-  // Convert JS day (Sun=0) to our Mon-based index (Mon=0)
-  const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
-  const schedule = WEEK_SCHEDULE.find(s => s.dayIndex === adjustedIndex);
-  if (!schedule || schedule.isRest || !schedule.sessionId) return null;
-  return WORKOUT_SESSIONS.find(s => s.id === schedule.sessionId) ?? null;
-}
+// getTodaySession imported from workouts
 
 const TIPS = [
   'At 50+, consistency beats intensity. Showing up 4 times a week changes everything.',

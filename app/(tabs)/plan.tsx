@@ -9,13 +9,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../constants/colors';
-import { WORKOUT_SESSIONS, WEEK_SCHEDULE } from '../../data/workouts';
+import { WORKOUT_SESSIONS, WEEK_SCHEDULE, getAdjustedDayIndex } from '../../data/workouts';
 import { WorkoutSessionCard } from '../../components/WorkoutSessionCard';
 
-function getTodayDayIndex(): number {
-  const day = new Date().getDay(); // 0=Sun
-  return day === 0 ? 6 : day - 1; // convert to Mon=0
-}
+// getAdjustedDayIndex imported from workouts (Sat=0)
 
 const NUTRITION_TIPS = [
   { icon: '🥚', title: 'Protein First', body: 'Aim for 25–30g protein per meal. Eggs, fish, chicken, legumes. Preserves muscle while losing fat.' },
@@ -32,7 +29,7 @@ const PROGRESSION: { week: string; tip: string }[] = [
 ];
 
 export default function PlanScreen() {
-  const todayIndex = getTodayDayIndex();
+  const todayIndex = getAdjustedDayIndex();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -44,7 +41,7 @@ export default function PlanScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Your 6-Week Plan</Text>
-          <Text style={styles.subtitle}>15 minutes · 4 days/week · Bodyweight only</Text>
+          <Text style={styles.subtitle}>15 minutes · 5 days/week · Strength + Tai Chi</Text>
         </View>
 
         {/* Profile badge */}
@@ -56,13 +53,24 @@ export default function PlanScreen() {
         >
           <View>
             <Text style={styles.profileLabel}>Your Profile</Text>
-            <Text style={styles.profileText}>Beginner · No Equipment · Weight Loss Focus</Text>
+            <Text style={styles.profileText}>Beginner · No Equipment · Weight Loss + Tai Chi</Text>
           </View>
           <View style={styles.profileStats}>
             <Text style={styles.profileStat}>4x{'\n'}<Text style={styles.profileStatLabel}>per week</Text></Text>
             <Text style={styles.profileStat}>15m{'\n'}<Text style={styles.profileStatLabel}>per session</Text></Text>
             <Text style={styles.profileStat}>6wk{'\n'}<Text style={styles.profileStatLabel}>program</Text></Text>
           </View>
+        </LinearGradient>
+
+        {/* Tai Chi benefits */}
+        <LinearGradient
+          colors={['#7c3aed44', '#4f46e544']}
+          style={styles.taiChiCard}
+        >
+          <Text style={styles.taiChiTitle}>🥋 Why Tai Chi?</Text>
+          <Text style={styles.taiChiBody}>
+            For men over 50, Tai Chi is one of the most evidence-backed exercises for longevity. Two 15-minute sessions per week improves balance (reducing fall risk by 45%), lowers blood pressure, reduces cortisol, and strengthens joints without impact stress.
+          </Text>
         </LinearGradient>
 
         {/* Weekly calendar strip */}
@@ -83,7 +91,7 @@ export default function PlanScreen() {
                 ) : (
                   <View style={[styles.workoutDot, { backgroundColor: session?.colorStart ?? Colors.accent }]}>
                     <Text style={styles.workoutDotText}>
-                      {session?.type === 'strength' ? '💪' : session?.type === 'cardio' ? '🔥' : session?.type === 'mobility' ? '🌿' : '–'}
+                      {session?.type === 'strength' ? '💪' : session?.type === 'cardio' ? '🔥' : session?.type === 'taichi' ? '🥋' : session?.type === 'mobility' ? '🌿' : '–'}
                     </Text>
                   </View>
                 )}
@@ -299,4 +307,22 @@ const styles = StyleSheet.create({
     lineHeight: 17,
   },
   bottomPad: { height: 20 },
+  taiChiCard: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#7c3aed40',
+  },
+  taiChiTitle: {
+    color: Colors.text,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  taiChiBody: {
+    color: Colors.textDim,
+    fontSize: 13,
+    lineHeight: 19,
+  },
 });
