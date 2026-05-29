@@ -49,6 +49,14 @@ function CheckIcon({ color = Colors.success, size = 20 }) {
   );
 }
 
+function PlayIcon({ color = Colors.white, size = 20 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Path d="M5 3l14 9-14 9V3z" />
+    </Svg>
+  );
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function formatTime(seconds: number): string {
