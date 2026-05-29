@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { Colors } from '../constants/colors';
 import type { WorkoutSession } from '../data/workouts';
 
@@ -9,6 +8,7 @@ interface Props {
   session: WorkoutSession;
   isToday?: boolean;
   isCompleted?: boolean;
+  onPress?: (id: string) => void;
 }
 
 const TYPE_LABELS: Record<WorkoutSession['type'], string> = {
@@ -18,13 +18,13 @@ const TYPE_LABELS: Record<WorkoutSession['type'], string> = {
   rest: 'Rest',
 };
 
-export function WorkoutSessionCard({ session, isToday, isCompleted }: Props) {
+export function WorkoutSessionCard({ session, isToday, isCompleted, onPress }: Props) {
   const totalExercises = session.warmup.length + session.circuit.length + session.cooldown.length;
 
   return (
     <TouchableOpacity
       activeOpacity={0.85}
-      onPress={() => router.push(`/workout/${session.id}`)}
+      onPress={() => onPress?.(session.id)}
       style={styles.wrapper}
     >
       <LinearGradient

@@ -33,16 +33,9 @@
       },
       "package": "com.fitover50.app"
     },
-    "plugins": [
-      "expo-router"
-    ],
     "web": {
       "bundler": "metro",
-      "output": "single",
       "favicon": "./assets/icon.png"
-    },
-    "experiments": {
-      "typedRoutes": true
     }
   }
 }
