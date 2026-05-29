@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
     "scheme": "fitover50",
     "splash": {
       "image": "./assets/splash-icon.png",

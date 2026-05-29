@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
-    "@react-navigation/native": "^6.1.18",
     "expo": "~54.0.0",
-    "expo-av": "~15.0.0",
-    "expo-constants": "~17.0.0",
-    "expo-font": "~13.0.0",
     "expo-linear-gradient": "~13.0.0",
     "expo-linking": "~7.0.0",
     "expo-router": "~4.0.0",
