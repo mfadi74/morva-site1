@@ -8,16 +8,16 @@ import {
   Animated,
   Alert,
   Dimensions,
-  Platform,
 } from 'react-native';
 import { useLocalSearchParams, router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path, Circle, Polyline } from 'react-native-svg';
-import YoutubeIframe from 'react-native-youtube-iframe';
 import { Colors } from '../../constants/colors';
 import { WORKOUT_SESSIONS } from '../../data/workouts';
 import type { Exercise, WorkoutSession } from '../../data/workouts';
+import { ExerciseAnimator } from '../../components/ExerciseAnimator';
+import { EXERCISE_STEPS } from '../../data/exerciseSteps';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -31,13 +31,6 @@ function BackIcon() {
   );
 }
 
-function PlayIcon({ color = Colors.background, size = 24 }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-      <Path d="M5 3l14 9-14 9V3z" />
-    </Svg>
-  );
-}
 
 function TimerIcon({ color = Colors.accent, size = 20 }) {
   return (
@@ -103,12 +96,7 @@ function ExerciseVideoCard({
   isCompleted: boolean;
   onComplete: () => void;
 }) {
-  const [playing, setPlaying] = useState(false);
   const [expanded, setExpanded] = useState(index === 0);
-
-  const onStateChange = useCallback((state: string) => {
-    if (state === 'ended') setPlaying(false);
-  }, []);
 
   const difficultyColor =
     exercise.difficulty === 'easy' ? Colors.success
@@ -190,33 +178,14 @@ function ExerciseVideoCard({
             <Text style={styles.tipText}>{exercise.tip}</Text>
           </View>
 
-          {/* YouTube Video */}
-          <View style={styles.videoContainer}>
-            <Text style={styles.videoLabel}>EXERCISE DEMONSTRATION</Text>
-            <View style={styles.videoWrapper}>
-              <YoutubeIframe
-                videoId={exercise.youtubeId}
-                height={200}
-                width={SCREEN_WIDTH - 80}
-                play={playing}
-                onChangeState={onStateChange}
-              />
-            </View>
-            <TouchableOpacity
-              style={[styles.playVideoBtn, playing && styles.playVideoBtnActive]}
-              onPress={() => setPlaying(p => !p)}
-            >
-              <PlayIcon color={playing ? Colors.accent : Colors.background} size={18} />
-              <Text style={[styles.playVideoBtnText, playing && { color: Colors.accent }]}>
-                {playing ? 'Pause Video' : 'Play Demonstration'}
-              </Text>
-            </TouchableOpacity>
-            {!playing && (
-              <Text style={styles.videoSearchTip}>
-                Search: "{exercise.youtubeQuery}"
-              </Text>
-            )}
-          </View>
+          {/* Step-by-step animated demonstration */}
+          {EXERCISE_STEPS[exercise.id] && (
+            <ExerciseAnimator
+              steps={EXERCISE_STEPS[exercise.id]}
+              exerciseName={exercise.name}
+              autoPlay={expanded}
+            />
+          )}
 
           {/* Complete button */}
           <TouchableOpacity
