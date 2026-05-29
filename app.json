@@ -34,13 +34,7 @@
       "package": "com.fitover50.app"
     },
     "plugins": [
-      "expo-router",
-      [
-        "expo-health",
-        {
-          "isClinicalDataEnabled": false
-        }
-      ]
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
