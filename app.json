@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "AchieveOS",
+    "slug": "achieveos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "achieveos",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0F0F1A",
+    "splash": {
+      "backgroundColor": "#0F0F1A",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.achieveos.app"
+    },
+    "android": {
+      "package": "com.achieveos.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F0F1A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0F0F1A",
+          "resizeMode": "contain"
+        }
+      ]
+    ]
+  }
+}
