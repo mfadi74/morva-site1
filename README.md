@@ -45,7 +45,14 @@ Paste them in **Settings → AI providers**, then use the **AI Network** view. K
 
 ### 3. Voice
 
-Works out of the box in **Chrome or Edge** (uses the browser's built-in speech engine — no key needed). The 🎤 button appears next to every input; **Listen** on any answer reads it aloud; the 🔊 toggle in the top bar auto-reads every new answer. Arabic recognition and speech are supported.
+Voice **input** (🎤 next to every field) works out of the box in **Chrome or Edge** — browser speech recognition, English and Arabic.
+
+Voice **output** has two levels:
+
+- **Premium — ElevenLabs:** paste your ElevenLabs API key in **Settings → Voice** (elevenlabs.io → profile icon → *API Keys*). The voice ID `Gubgw9l4dtIoQA9YZHgx` is pre-configured; the `eleven_multilingual_v2` model speaks both English and Arabic with the same voice. Long answers are capped at ~2,500 characters per reading to control credit usage.
+- **Fallback — browser voice:** used automatically when no ElevenLabs key is set (or if an ElevenLabs call fails), so speech always works.
+
+**Listen** on any answer reads it aloud; the 🔊 toggle in the top bar auto-reads every new answer.
 
 ### 4. Arabic
 

@@ -77,7 +77,10 @@ const STR = {
     openaiKeyPh: "OpenAI API key (sk-…)",
     geminiKeyPh: "Google Gemini API key (AIza…)",
     voiceSection: "Voice",
-    voiceHelp: "Voice input and spoken answers use your browser's built-in speech engine (best in Chrome / Edge). The microphone button appears next to every input field; the Listen button reads any answer aloud. Arabic voice is supported.",
+    elevenKeyPh: "ElevenLabs API key (xi-…)",
+    elevenVoiceIdPh: "ElevenLabs voice ID",
+    elevenHelp: "Premium voice: paste your ElevenLabs API key (elevenlabs.io → profile icon → API Keys) and the app will read answers with your selected ElevenLabs voice — the voice ID is already set. One voice speaks both English and Arabic. Without a key, the browser's built-in voice is used automatically.",
+    voiceHelp: "Voice input (microphone) uses your browser's built-in speech recognition (best in Chrome / Edge). The microphone button appears next to every input field; the Listen button reads any answer aloud. Arabic voice is supported.",
     autoSpeak: "Automatically read answers aloud",
     saveSettings: "Save settings",
     settingsSaved: "Settings saved ✓",
@@ -143,7 +146,10 @@ const STR = {
     openaiKeyPh: "مفتاح OpenAI (sk-…)",
     geminiKeyPh: "مفتاح Google Gemini (AIza…)",
     voiceSection: "الصوت",
-    voiceHelp: "الإدخال الصوتي والإجابات المنطوقة يستخدمان محرك الصوت المدمج في المتصفح (الأفضل في كروم / إيدج). زر الميكروفون يظهر بجانب كل حقل إدخال؛ وزر «استماع» يقرأ أي إجابة بصوت عالٍ. الصوت العربي مدعوم.",
+    elevenKeyPh: "مفتاح ElevenLabs (xi-…)",
+    elevenVoiceIdPh: "معرّف صوت ElevenLabs",
+    elevenHelp: "الصوت الاحترافي: الصق مفتاح ElevenLabs (من elevenlabs.io ← أيقونة الحساب ← API Keys) وسيقرأ التطبيق الإجابات بصوت ElevenLabs الذي اخترته — معرّف الصوت مضبوط مسبقاً. الصوت نفسه يتحدث الإنجليزية والعربية. بدون مفتاح، يُستخدم صوت المتصفح المدمج تلقائياً.",
+    voiceHelp: "الإدخال الصوتي (الميكروفون) يستخدم التعرف على الكلام المدمج في المتصفح (الأفضل في كروم / إيدج). زر الميكروفون يظهر بجانب كل حقل إدخال؛ وزر «استماع» يقرأ أي إجابة بصوت عالٍ. الصوت العربي مدعوم.",
     autoSpeak: "قراءة الإجابات بصوت عالٍ تلقائياً",
     saveSettings: "حفظ الإعدادات",
     settingsSaved: "تم حفظ الإعدادات ✓",
@@ -657,10 +663,34 @@ function stripForSpeech(text) {
     .trim();
 }
 
-function speakText(text, language) {
+// Premium voice via ElevenLabs when configured in Settings; browser voice as fallback.
+// The App keeps this module-level config in sync with saved settings.
+const DEFAULT_ELEVEN_VOICE_ID = "Gubgw9l4dtIoQA9YZHgx";
+const voiceConfig = { apiKey: "", voiceId: DEFAULT_ELEVEN_VOICE_ID };
+let currentAudio = null;
+
+async function speakWithElevenLabs(text) {
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceConfig.voiceId}`, {
+    method: "POST",
+    headers: { "xi-api-key": voiceConfig.apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text,
+      model_id: "eleven_multilingual_v2", // speaks both English and Arabic with the same voice
+      voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+    }),
+  });
+  if (!r.ok) throw new Error("ElevenLabs error " + r.status);
+  const blob = await r.blob();
+  const url = URL.createObjectURL(blob);
+  stopSpeaking();
+  currentAudio = new Audio(url);
+  currentAudio.onended = () => { URL.revokeObjectURL(url); currentAudio = null; };
+  await currentAudio.play();
+}
+
+function speakWithBrowser(clean, language) {
   if (typeof window === "undefined" || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const clean = stripForSpeech(text);
   // Chunk by sentence groups — long utterances get cut off on some platforms.
   const sentences = clean.match(/[^.!؟?。\n]+[.!؟?。\n]?/g) || [clean];
   const chunks = [];
@@ -681,7 +711,25 @@ function speakText(text, language) {
   }
 }
 
+async function speakText(text, language) {
+  const clean = stripForSpeech(text);
+  if (voiceConfig.apiKey && voiceConfig.voiceId) {
+    try {
+      // Cap request size to keep ElevenLabs credit usage reasonable per answer.
+      await speakWithElevenLabs(clean.slice(0, 2500));
+      return;
+    } catch (e) {
+      console.error("ElevenLabs voice failed — falling back to browser voice", e);
+    }
+  }
+  speakWithBrowser(clean, language);
+}
+
 function stopSpeaking() {
+  if (currentAudio) {
+    try { currentAudio.pause(); } catch (e) {}
+    currentAudio = null;
+  }
   if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
@@ -1296,6 +1344,8 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
     anthropicKey: settings.anthropicKey || "",
     openaiKey: settings.openaiKey || "",
     geminiKey: settings.geminiKey || "",
+    elevenKey: settings.elevenKey || "",
+    elevenVoiceId: settings.elevenVoiceId || DEFAULT_ELEVEN_VOICE_ID,
   });
   const [savedMsg, setSavedMsg] = useState(false);
 
@@ -1341,6 +1391,9 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
 
       <div className="rounded-lg p-4 mb-5" style={{ background: "#fff", border: "1px solid #e2ded2" }}>
         <div className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>{L.voiceSection}</div>
+        {field("elevenKey", L.elevenKeyPh)}
+        {field("elevenVoiceId", L.elevenVoiceIdPh, "text")}
+        <p className="text-xs leading-relaxed mb-3" style={{ color: "#77725f" }}>{L.elevenHelp}</p>
         <label className="flex items-center gap-2 text-sm mb-2" style={{ color: INK }}>
           <input type="checkbox" checked={autoSpeak} onChange={(e) => setAutoSpeak(e.target.checked)} />
           {L.autoSpeak}
@@ -1390,6 +1443,12 @@ export default function NorcoExecutiveSuite() {
     // Preload voices (Chrome loads them async).
     if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.getVoices();
   }, []);
+
+  // Keep the ElevenLabs voice config in sync with saved settings.
+  useEffect(() => {
+    voiceConfig.apiKey = settings.elevenKey || "";
+    voiceConfig.voiceId = settings.elevenVoiceId || DEFAULT_ELEVEN_VOICE_ID;
+  }, [settings]);
 
   const persistPrefs = (patch) => {
     setSettings((prev) => {
