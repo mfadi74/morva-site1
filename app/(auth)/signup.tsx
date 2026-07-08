@@ -6,9 +6,11 @@ import { Input, PrimaryButton } from '@/components/ui';
 import { colors, font, spacing } from '@/constants/theme';
 import { isSupabaseEnabled, supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/appStore';
+import { useT } from '@/lib/i18n';
 
 export default function Signup() {
   const createProfile = useAppStore((s) => s.createProfile);
+  const { t } = useT();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [email, setEmail] = useState('');
@@ -55,20 +57,18 @@ export default function Signup() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={styles.title}>Create your account</Text>
+          <Text style={styles.title}>{t('auth.createAccount')}</Text>
           <Text style={styles.subtitle}>
-            {isSupabaseEnabled
-              ? 'Your progress syncs to the cloud, private to you.'
-              : 'Demo mode: everything is saved privately on this device.'}
+            {isSupabaseEnabled ? t('auth.cloudNote') : t('auth.demoSignupNote')}
           </Text>
 
-          <Input placeholder="Your name or nickname" value={name} onChangeText={setName} style={styles.field} />
-          <Input placeholder="Country (optional)" value={country} onChangeText={setCountry} style={styles.field} />
+          <Input placeholder={t('auth.name')} value={name} onChangeText={setName} style={styles.field} />
+          <Input placeholder={t('auth.country')} value={country} onChangeText={setCountry} style={styles.field} />
 
           {isSupabaseEnabled && (
             <>
               <Input
-                placeholder="Email"
+                placeholder={t('auth.email')}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -76,7 +76,7 @@ export default function Signup() {
                 style={styles.field}
               />
               <Input
-                placeholder="Password (6+ characters)"
+                placeholder={t('auth.passwordHint')}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -86,14 +86,12 @@ export default function Signup() {
           )}
 
           <PrimaryButton
-            label={isSupabaseEnabled ? 'Sign Up' : 'Start My Journey'}
+            label={isSupabaseEnabled ? t('auth.signUp') : t('auth.startJourney')}
             onPress={() => void handleCreate()}
             loading={loading}
             style={{ marginTop: spacing.md }}
           />
-          <Text style={styles.privacy}>
-            No creepy tracking. Your data is yours — always.
-          </Text>
+          <Text style={styles.privacy}>{t('auth.privacy')}</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

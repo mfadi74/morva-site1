@@ -6,18 +6,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { PrimaryButton } from '@/components/ui';
 import { colors, font, radius, spacing } from '@/constants/theme';
 import { useAppStore } from '@/stores/appStore';
-
-const FOCUS_AREAS: { key: string; icon: keyof typeof Ionicons.glyphMap; title: string; text: string }[] = [
-  { key: 'money', icon: 'wallet', title: 'Get my money right', text: 'Budgeting, saving, and stress-free spending' },
-  { key: 'mind', icon: 'heart', title: 'Protect my peace', text: 'Mood tracking, journaling, less burnout' },
-  { key: 'hustle', icon: 'rocket', title: 'Launch a side hustle', text: 'Turn a skill into income in 30 days' },
-  { key: 'growth', icon: 'trending-up', title: 'Level up daily', text: 'Streaks, XP, and visible progress' },
-];
+import { useT } from '@/lib/i18n';
 
 export default function Onboarding() {
   const profile = useAppStore((s) => s.profile);
   const completeOnboarding = useAppStore((s) => s.completeOnboarding);
+  const { t } = useT();
   const [selected, setSelected] = useState<string[]>([]);
+
+  const FOCUS_AREAS: { key: string; icon: keyof typeof Ionicons.glyphMap; title: string; text: string }[] = [
+    { key: 'money', icon: 'wallet', title: t('onboarding.money'), text: t('onboarding.moneyText') },
+    { key: 'mind', icon: 'heart', title: t('onboarding.mind'), text: t('onboarding.mindText') },
+    { key: 'hustle', icon: 'rocket', title: t('onboarding.hustle'), text: t('onboarding.hustleText') },
+    { key: 'growth', icon: 'trending-up', title: t('onboarding.growth'), text: t('onboarding.growthText') },
+  ];
 
   function toggle(key: string) {
     setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
@@ -32,9 +34,10 @@ export default function Onboarding() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>
-          Hey {profile?.full_name ?? 'there'} 👋{'\n'}What are we fixing first?
+          {profile?.full_name ? `${profile.full_name} 👋\n` : ''}
+          {t('onboarding.title')}
         </Text>
-        <Text style={styles.subtitle}>Pick what matters most — you can do it all later.</Text>
+        <Text style={styles.subtitle}>{t('onboarding.subtitle')}</Text>
 
         {FOCUS_AREAS.map((f) => {
           const active = selected.includes(f.key);
@@ -64,7 +67,7 @@ export default function Onboarding() {
 
       <View style={styles.footer}>
         <PrimaryButton
-          label={selected.length ? `Let's go (${selected.length} picked)` : "Let's go"}
+          label={selected.length ? `${t('onboarding.go')} (${selected.length})` : t('onboarding.go')}
           onPress={() => void handleContinue()}
         />
       </View>

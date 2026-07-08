@@ -10,9 +10,10 @@ import { CoachCard } from '@/components/CoachCard';
 import { colors, font, radius, spacing } from '@/constants/theme';
 import { growthScores, lifeScore, moduleScores } from '@/lib/scores';
 import { askCoach, CoachContext } from '@/lib/ai';
-import { computeStreak, dayKey, greeting, levelFromXp } from '@/lib/utils';
+import { computeStreak, dayKey, greetingKey, levelFromXp } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
 import { GrowthKey } from '@/types';
+import { useT } from '@/lib/i18n';
 
 const MODULE_META: Record<
   string,
@@ -65,6 +66,7 @@ export default function Home() {
   const greenActions = useAppStore((s) => s.greenActions);
   const nestGoal = useAppStore((s) => s.nestGoal);
 
+  const { t } = useT();
   const [insight, setInsight] = useState('');
   const [insightLoading, setInsightLoading] = useState(true);
 
@@ -136,7 +138,7 @@ export default function Home() {
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>
-              {greeting()}, {profile.full_name.split(' ')[0]}
+              {t(greetingKey())}, {profile.full_name.split(' ')[0]}
             </Text>
             <Text style={styles.date}>{format(new Date(), 'EEEE, MMMM d')}</Text>
           </View>
@@ -166,10 +168,10 @@ export default function Home() {
           </View>
         </Card>
 
-        <SectionTitle title="Today's insight" />
+        <SectionTitle title={t('home.insight')} />
         <CoachCard message={insight} loading={insightLoading} />
 
-        <SectionTitle title="Your modules" />
+        <SectionTitle title={t('home.yourModules')} />
         {scores.map((m) => {
           const meta = MODULE_META[m.key];
           return (
@@ -203,7 +205,7 @@ export default function Home() {
         })}
 
         <SectionTitle
-          title="Grow your life"
+          title={t('home.grow')}
           action={<Text style={styles.phaseTag}>7 MODULES</Text>}
         />
         <View style={styles.growGrid}>
@@ -234,17 +236,15 @@ export default function Home() {
           })}
         </View>
 
-        <SectionTitle title="Community" />
+        <SectionTitle title={t('home.community')} />
         <TouchableOpacity activeOpacity={0.85} onPress={() => router.push('/modules/community')}>
           <Card style={styles.communityCard}>
             <View style={styles.communityIcon}>
               <Ionicons name="chatbubbles" size={22} color={colors.primary} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.communityTitle}>Peer circles</Text>
-              <Text style={styles.communityText}>
-                Anonymous, supportive spaces for burnout, money wins, hustle & more. You're not alone.
-              </Text>
+              <Text style={styles.communityTitle}>{t('home.peerCircles')}</Text>
+              <Text style={styles.communityText}>{t('home.peerText')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.muted} />
           </Card>

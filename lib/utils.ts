@@ -28,6 +28,15 @@ export function greeting(): string {
   return 'Good evening';
 }
 
+/** Translation key for the current time-of-day greeting. */
+export function greetingKey(): string {
+  const h = new Date().getHours();
+  if (h < 5) return 'home.greeting.night';
+  if (h < 12) return 'home.greeting.morning';
+  if (h < 18) return 'home.greeting.afternoon';
+  return 'home.greeting.evening';
+}
+
 /** Consecutive-day streak ending today or yesterday. */
 export function computeStreak(activityDates: string[]): number {
   const days = new Set(activityDates);

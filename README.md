@@ -46,6 +46,17 @@ The **Grow your life** grid now holds all 7 modules; the **Community** section o
 | 🏠 **NestUp** (Housing) | Only 3.9% can rent alone | Housing goal + deposit savings tracker, 6-point readiness checklist, AI housing coach |
 | 💬 **Community Layer** | Isolation & loneliness | Anonymous peer circles (burnout, money, hustle, study, anxiety), post + like, AI-safe framing |
 
+### Phase 4 — Scale (also built ✅)
+
+The monetization + reach layer from the guide.
+
+| Piece | What it does |
+| --- | --- |
+| 🌍 **Multilingual** | Full i18n with **English, Spanish, and Arabic (RTL)**. Switch language on Welcome or in Profile → Settings; the app chrome and layout mirror live for Arabic. See [`lib/i18n.ts`](lib/i18n.ts). |
+| 🏢 **B2B / Teams** | An employer & university wellness dashboard (Profile → Teams): aggregate, **anonymized** KPIs, Life-Score trend, module engagement, wellbeing mix, join-by-code. |
+| 🎨 **White-label** | Re-skin name, tagline, and accent from one file ([`constants/branding.ts`](constants/branding.ts)); wired live across the app. Guide: [`docs/WHITELABEL.md`](docs/WHITELABEL.md). |
+| 🔌 **AchieveOS API** | A partner REST API for aggregate org data — reference edge function ([`supabase/functions/achieveos-api`](supabase/functions/achieveos-api/index.ts)) + spec ([`docs/API.md`](docs/API.md)). |
+
 **Cross-cutting, by design (straight from the research):**
 - **Dark mode by default** — 82% of Gen Z expect it.
 - **AI front-and-centre** — a coach card on every module, not hidden away.
@@ -171,9 +182,9 @@ instructions for both platforms (the app runs as a web app there instantly).
 - **Phase 1 — MVP (done ✅):** MoneyMap, Stillwell, LaunchPad, AI Goals + Life Score.
 - **Phase 2 — Growth (core modules done ✅):** CareerGPS, Sprinto (skills), RootHealth, Connekt — all four built and wired into the Life Score. Still to come this phase: Plaid bank sync, therapist booking, Arabic + Spanish.
 - **Phase 3 — Expansion (core modules done ✅):** BrandSelf, Greenprint, NestUp, and the Community layer — all built. Still to come this phase: real-time shared circles + moderation.
-- **Phase 4 — Scale:** B2B wellness, multilingual, white-label, AchieveOS API.
+- **Phase 4 — Scale (foundations done ✅):** multilingual (EN/ES/AR + RTL), B2B Teams dashboard, white-label branding, and the AchieveOS partner API. Still to come this phase: production aggregate views for the API and per-tenant runtime theming.
 
-**All 10 life modules from the guide are now implemented**, plus the AI Life-Score engine, gamification, and the community layer.
+**All 10 life modules from the guide are implemented**, plus the AI Life-Score engine, gamification, the community layer, localization, B2B, white-label, and the partner API — i.e. all four phases of the roadmap have working foundations.
 
 ---
 

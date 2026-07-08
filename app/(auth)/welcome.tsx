@@ -4,31 +4,35 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { PrimaryButton } from '@/components/ui';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { colors, font, radius, spacing } from '@/constants/theme';
+import { BRANDING } from '@/constants/branding';
 import { isSupabaseEnabled } from '@/lib/supabase';
-
-const FEATURES: { icon: keyof typeof Ionicons.glyphMap; title: string; text: string }[] = [
-  { icon: 'wallet', title: 'MoneyMap', text: 'Track money, build a savings habit, get AI spending insights' },
-  { icon: 'heart', title: 'Stillwell', text: 'Daily mood check-ins, journaling, and a coach that gets it' },
-  { icon: 'rocket', title: 'LaunchPad', text: 'Pick a side hustle and launch it with a 30-day roadmap' },
-];
+import { useT } from '@/lib/i18n';
 
 export default function Welcome() {
+  const { t } = useT();
+  const features: { icon: keyof typeof Ionicons.glyphMap; title: string; text: string }[] = [
+    { icon: 'wallet', title: t('welcome.money.title'), text: t('welcome.money.text') },
+    { icon: 'heart', title: t('welcome.mind.title'), text: t('welcome.mind.text') },
+    { icon: 'rocket', title: t('welcome.hustle.title'), text: t('welcome.hustle.text') },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.hero}>
-        <View style={styles.logo}>
+        <View style={[styles.logo, { backgroundColor: BRANDING.accent }]}>
           <Ionicons name="flash" size={34} color={colors.white} />
         </View>
-        <Text style={styles.title}>AchieveOS</Text>
-        <Text style={styles.tagline}>Your life. Engineered.</Text>
+        <Text style={styles.title}>{BRANDING.appName}</Text>
+        <Text style={styles.tagline}>{BRANDING.tagline}</Text>
       </View>
 
       <View style={{ flex: 1 }}>
-        {FEATURES.map((f) => (
+        {features.map((f) => (
           <View key={f.title} style={styles.feature}>
             <View style={styles.featureIcon}>
-              <Ionicons name={f.icon} size={20} color={colors.primary} />
+              <Ionicons name={f.icon} size={20} color={BRANDING.accent} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.featureTitle}>{f.title}</Text>
@@ -38,18 +42,21 @@ export default function Welcome() {
         ))}
       </View>
 
-      <PrimaryButton label="Get Started" onPress={() => router.push('/(auth)/signup')} />
+      <LanguageSwitcher />
+      <PrimaryButton
+        label={t('welcome.getStarted')}
+        onPress={() => router.push('/(auth)/signup')}
+        style={{ marginTop: spacing.md }}
+      />
       {isSupabaseEnabled ? (
         <PrimaryButton
-          label="I already have an account"
+          label={t('welcome.haveAccount')}
           variant="ghost"
           onPress={() => router.push('/(auth)/login')}
           style={{ marginTop: spacing.sm }}
         />
       ) : (
-        <Text style={styles.demoNote}>
-          Running in local demo mode — your data stays on this device.
-        </Text>
+        <Text style={styles.demoNote}>{t('welcome.demoNote')}</Text>
       )}
     </SafeAreaView>
   );

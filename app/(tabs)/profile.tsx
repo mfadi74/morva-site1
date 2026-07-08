@@ -1,19 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { format, parseISO } from 'date-fns';
 import { Card, PrimaryButton, ProgressBar, SectionTitle, StatBox } from '@/components/ui';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { colors, font, radius, spacing } from '@/constants/theme';
+import { BRANDING } from '@/constants/branding';
 import { ACHIEVEMENTS } from '@/constants/content';
 import { isSupabaseEnabled, supabase } from '@/lib/supabase';
 import { isAiLive } from '@/lib/ai';
 import { computeStreak, levelFromXp } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
+import { useT } from '@/lib/i18n';
 
 export default function Profile() {
   const profile = useAppStore((s) => s.profile);
+  const { t } = useT();
   const transactions = useAppStore((s) => s.transactions);
   const moods = useAppStore((s) => s.moods);
   const signOutLocal = useAppStore((s) => s.signOutLocal);
@@ -79,12 +83,32 @@ export default function Profile() {
         </Card>
 
         <View style={styles.statsRow}>
-          <StatBox label="Streak" value={`${streak}🔥`} />
-          <StatBox label="Check-ins" value={String(moods.length)} />
-          <StatBox label="Transactions" value={String(transactions.length)} />
+          <StatBox label={t('profile.streak')} value={`${streak}🔥`} />
+          <StatBox label={t('profile.checkins')} value={String(moods.length)} />
+          <StatBox label={t('profile.transactions')} value={String(transactions.length)} />
         </View>
 
-        <SectionTitle title={`Achievements (${profile.achievements.length}/${ACHIEVEMENTS.length})`} />
+        <SectionTitle title={t('profile.teams')} />
+        <TouchableOpacity activeOpacity={0.85} onPress={() => router.push('/modules/teams')}>
+          <Card style={styles.teamsCard}>
+            <View style={styles.teamsIcon}>
+              <Ionicons name="business" size={20} color={BRANDING.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.teamsTitle}>{t('profile.teams')}</Text>
+              <Text style={styles.teamsText}>{t('profile.teamsText')}</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+          </Card>
+        </TouchableOpacity>
+
+        <SectionTitle title={t('profile.settings')} />
+        <Card>
+          <Text style={styles.settingLabel}>{t('profile.language')}</Text>
+          <LanguageSwitcher />
+        </Card>
+
+        <SectionTitle title={`${t('profile.achievements')} (${profile.achievements.length}/${ACHIEVEMENTS.length})`} />
         <View style={styles.achievementGrid}>
           {ACHIEVEMENTS.map((a) => {
             const earned = profile.achievements.includes(a.key);
@@ -106,7 +130,7 @@ export default function Profile() {
           })}
         </View>
 
-        <SectionTitle title="App status" />
+        <SectionTitle title={t('profile.appStatus')} />
         <Card>
           <StatusRow
             icon="cloud"
@@ -126,12 +150,14 @@ export default function Profile() {
         </Card>
 
         <PrimaryButton
-          label="Sign out"
+          label={t('profile.signOut')}
           variant="danger"
           onPress={handleSignOut}
           style={{ marginTop: spacing.lg }}
         />
-        <Text style={styles.version}>AchieveOS v1.0.0 · Your life. Engineered.</Text>
+        <Text style={styles.version}>
+          {BRANDING.appName} v1.0.0 · {BRANDING.tagline}
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -277,5 +303,34 @@ const styles = StyleSheet.create({
     fontSize: font.tiny,
     textAlign: 'center',
     marginTop: spacing.lg,
+  },
+  teamsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  teamsIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  teamsTitle: {
+    color: colors.text,
+    fontSize: font.body,
+    fontWeight: '700',
+  },
+  teamsText: {
+    color: colors.muted,
+    fontSize: font.small,
+    marginTop: 2,
+  },
+  settingLabel: {
+    color: colors.text,
+    fontSize: font.small,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
   },
 });

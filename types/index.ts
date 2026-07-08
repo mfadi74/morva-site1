@@ -1,3 +1,5 @@
+export type Lang = 'en' | 'es' | 'ar';
+
 export type TransactionType = 'income' | 'expense';
 
 export interface Transaction {

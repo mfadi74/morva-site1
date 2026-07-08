@@ -11,6 +11,7 @@ import {
   GreenAction,
   HealthLog,
   JournalEntry,
+  Lang,
   MoodLog,
   NestContribution,
   NestGoal,
@@ -51,6 +52,8 @@ interface PersistedState {
   nestGoal: NestGoal | null;
   nestContributions: NestContribution[];
   communityPosts: CommunityPost[];
+  // Settings
+  language: Lang;
 }
 
 export interface HealthInput {
@@ -100,6 +103,8 @@ interface AppState extends PersistedState {
   toggleNestChecklist: (key: string) => Promise<void>;
   addCommunityPost: (circle: string, handle: string, text: string) => Promise<void>;
   toggleCommunityLike: (id: string) => Promise<void>;
+  // Settings
+  setLanguage: (lang: Lang) => Promise<void>;
   clearUnlocked: () => void;
   signOutLocal: () => Promise<void>;
 }
@@ -123,6 +128,7 @@ function emptyState(): PersistedState {
     nestGoal: null,
     nestContributions: [],
     communityPosts: [],
+    language: 'en',
   };
 }
 
@@ -145,6 +151,7 @@ async function persist(state: PersistedState): Promise<void> {
     nestGoal: state.nestGoal,
     nestContributions: state.nestContributions,
     communityPosts: state.communityPosts,
+    language: state.language,
   };
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
 }
@@ -196,6 +203,7 @@ export const useAppStore = create<AppState>((set, get) => {
       nestGoal: changes.nestGoal !== undefined ? changes.nestGoal : prev.nestGoal,
       nestContributions: changes.nestContributions ?? prev.nestContributions,
       communityPosts: changes.communityPosts ?? prev.communityPosts,
+      language: changes.language ?? prev.language,
     };
     set({ ...next, lastUnlocked: unlocked.length ? unlocked : prev.lastUnlocked });
     await persist(next);
@@ -559,6 +567,10 @@ export const useAppStore = create<AppState>((set, get) => {
           : p,
       );
       await commit({ communityPosts });
+    },
+
+    setLanguage: async (lang) => {
+      await commit({ language: lang });
     },
 
     clearUnlocked: () => set({ lastUnlocked: [] }),
