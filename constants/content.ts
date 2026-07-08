@@ -137,6 +137,10 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { key: 'first_skill', title: 'Student Mode', description: 'Started learning a skill', icon: 'school', xp: 25 },
   { key: 'first_health', title: 'Body Check', description: 'Logged your first health day', icon: 'fitness', xp: 20 },
   { key: 'first_social', title: 'Brave Move', description: 'Took your first social action', icon: 'happy', xp: 20 },
+  { key: 'first_brand', title: 'Brand Builder', description: 'Set up your personal brand', icon: 'megaphone', xp: 25 },
+  { key: 'first_green', title: 'Eco Warrior', description: 'Logged your first green action', icon: 'leaf', xp: 20 },
+  { key: 'first_nest', title: 'Future Nester', description: 'Set your housing goal', icon: 'home', xp: 25 },
+  { key: 'first_community', title: 'Found Your People', description: 'Posted in a community circle', icon: 'chatbubbles', xp: 25 },
   { key: 'level_5', title: 'Level 5 Energy', description: 'Reached level 5', icon: 'star', xp: 0 },
 ];
 
@@ -193,6 +197,26 @@ export const OFFLINE_COACH = {
     'Nobody feels ready to reach out. Send the message anyway; the awkward 10 seconds beats the lonely week.',
     'Networking isn\'t selling — it\'s curiosity. Ask one person one real question about their world today.',
   ],
+  brand: [
+    'Your personal brand is just showing up consistently around one topic. Post one thing today — done beats perfect.',
+    'People follow clarity. If you can say what you help with in one line, you\'re ahead of most. Refine your bio.',
+    "Don't wait to feel like an expert. Document the journey, not just the destination — that's what people relate to.",
+  ],
+  green: [
+    'You don\'t need to be perfect to matter. One swap today — reusable bottle, one less delivery — is a real vote for the planet.',
+    'Small green habits stack. Pick the one that\'s easiest for you and repeat it; consistency beats guilt.',
+    'Climate action feels big, but your circle watches what you do. Log one action and quietly set the example.',
+  ],
+  nest: [
+    'Housing feels impossible until you break it into a number and a date. Save one small deposit contribution this week.',
+    'You\'re not behind — the system is hard. A tiny automatic transfer toward your deposit beats waiting for a windfall.',
+    'Independence is a checklist, not a leap. Tick one readiness item today and the goal gets a little more real.',
+  ],
+  community: [
+    'You are so much less alone than it feels. Someone in these circles has been exactly where you are.',
+    'Sharing one honest sentence can help a stranger more than you know — and help you too.',
+    'Lurking is fine, but one supportive reply today builds the kind of community you\'d want to find on a hard day.',
+  ],
 };
 
 // ── Phase 2: CareerGPS ──────────────────────────────────────────────
@@ -247,4 +271,101 @@ export const CONVERSATION_STARTERS = [
   "What's the best thing you've watched or read recently?",
   'How did you get into what you do?',
   "What's a small win you had this week?",
+];
+
+// ── Phase 3: BrandSelf ──────────────────────────────────────────────
+export const BRAND_PILLARS = [
+  'Tech',
+  'Fitness',
+  'Finance',
+  'Fashion',
+  'Gaming',
+  'Art & Design',
+  'Food',
+  'Travel',
+  'Study & Productivity',
+  'Music',
+  'Mental Health',
+  'Entrepreneurship',
+];
+
+export const BRAND_PLATFORMS: { key: string; label: string; icon: string }[] = [
+  { key: 'tiktok', label: 'TikTok', icon: 'logo-tiktok' },
+  { key: 'instagram', label: 'Instagram', icon: 'logo-instagram' },
+  { key: 'youtube', label: 'YouTube', icon: 'logo-youtube' },
+  { key: 'linkedin', label: 'LinkedIn', icon: 'logo-linkedin' },
+  { key: 'x', label: 'X', icon: 'logo-twitter' },
+  { key: 'other', label: 'Other', icon: 'globe-outline' },
+];
+
+// ── Phase 3: Greenprint ─────────────────────────────────────────────
+export const GREEN_ACTIONS: { key: string; label: string; icon: string; xp: number }[] = [
+  { key: 'transport', label: 'Walked, cycled or took transit', icon: 'bicycle-outline', xp: 10 },
+  { key: 'food', label: 'Ate plant-based / cut food waste', icon: 'leaf-outline', xp: 10 },
+  { key: 'waste', label: 'Reused, recycled or refused plastic', icon: 'refresh-outline', xp: 10 },
+  { key: 'energy', label: 'Saved energy or water', icon: 'flash-outline', xp: 10 },
+  { key: 'shopping', label: 'Bought secondhand / skipped a buy', icon: 'pricetag-outline', xp: 10 },
+];
+
+// ── Phase 3: NestUp ─────────────────────────────────────────────────
+export const NEST_CHECKLIST: { key: string; label: string }[] = [
+  { key: 'budget', label: 'I have a monthly budget I actually follow' },
+  { key: 'emergency', label: 'I have a small emergency fund (1 month+)' },
+  { key: 'deposit', label: 'I know my target deposit / upfront cost' },
+  { key: 'income', label: 'My income covers rent + bills with room to spare' },
+  { key: 'credit', label: 'I understand my credit / rental history' },
+  { key: 'research', label: 'I have researched areas and real prices' },
+];
+
+// ── Phase 3: Community Layer ────────────────────────────────────────
+export interface Circle {
+  key: string;
+  name: string;
+  icon: string;
+  blurb: string;
+  color: string;
+}
+
+export const CIRCLES: Circle[] = [
+  { key: 'burnout', name: 'Burnout & Rest', icon: 'bed-outline', blurb: 'For when it all feels like too much.', color: '#F472B6' },
+  { key: 'money', name: 'Money Wins', icon: 'cash-outline', blurb: 'Celebrate small financial wins together.', color: '#34D399' },
+  { key: 'hustle', name: 'Side Hustle', icon: 'rocket-outline', blurb: 'Founders-in-progress cheering each other on.', color: '#F59E0B' },
+  { key: 'study', name: 'Study & Focus', icon: 'book-outline', blurb: 'Accountability for exams, courses, and deep work.', color: '#A78BFA' },
+  { key: 'anxiety', name: 'Anxiety Support', icon: 'heart-outline', blurb: 'A gentle space. You are not alone here.', color: '#38BDF8' },
+];
+
+/** Seeded, supportive posts so circles never feel empty (read-only samples). */
+export const SEED_POSTS: Record<string, { handle: string; text: string; likes: number }[]> = {
+  burnout: [
+    { handle: 'quiet_koala', text: 'Took my first full day off in 3 weeks. The world did not end. Reminder for anyone who needs it. 💜', likes: 42 },
+    { handle: 'mint_tea', text: 'Ok tiny win: I said no to one extra shift. Terrifying but I already feel lighter.', likes: 28 },
+  ],
+  money: [
+    { handle: 'budget_bee', text: 'Hit my first $500 saved!! Started at literally $0 two months ago. Small amounts add up fr.', likes: 63 },
+    { handle: 'nova', text: 'Cancelled 3 subscriptions I forgot about = $34/mo back. Check yours, you\'ll be shocked.', likes: 51 },
+  ],
+  hustle: [
+    { handle: 'pixel_pat', text: 'Got my first paying client for design work today. Cried a little ngl. Keep going everyone.', likes: 77 },
+    { handle: 'sunny.side', text: 'Posted every day for 14 days straight. 3 sales so far. Consistency really is the cheat code.', likes: 34 },
+  ],
+  study: [
+    { handle: 'late_owl', text: '25 min focus, 5 min break. Did 4 rounds. Finally started the assignment I was dreading.', likes: 19 },
+    { handle: 'fig', text: 'Passed the exam I thought I\'d fail. To anyone spiralling right now: you know more than you think.', likes: 45 },
+  ],
+  anxiety: [
+    { handle: 'soft_static', text: 'Reminder: a bad day is not a bad life. Breathe. You\'ve survived 100% of them so far.', likes: 88 },
+    { handle: 'harbor', text: 'Told one friend how I actually felt this week. Scary but I feel 10% lighter. Recommend.', likes: 39 },
+  ],
+};
+
+/** Fun anonymous handles assigned to the user per session for privacy. */
+export const ANON_HANDLES = [
+  'brave_finch',
+  'calm_comet',
+  'golden_hour',
+  'still_river',
+  'kind_ember',
+  'lucky_sprout',
+  'quiet_storm',
+  'bright_side',
 ];

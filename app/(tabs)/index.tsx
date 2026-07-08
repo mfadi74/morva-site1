@@ -26,12 +26,27 @@ const MODULE_META: Record<
 
 const GROWTH_META: Record<
   GrowthKey,
-  { icon: keyof typeof Ionicons.glyphMap; color: string; route: '/modules/career' | '/modules/skills' | '/modules/health' | '/modules/social'; tag: string }
+  {
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    route:
+      | '/modules/career'
+      | '/modules/skills'
+      | '/modules/health'
+      | '/modules/social'
+      | '/modules/brand'
+      | '/modules/green'
+      | '/modules/nest';
+    tag: string;
+  }
 > = {
   career: { icon: 'compass', color: '#38BDF8', route: '/modules/career', tag: 'Career' },
   skills: { icon: 'school', color: '#A78BFA', route: '/modules/skills', tag: 'Skills' },
   health: { icon: 'fitness', color: '#34D399', route: '/modules/health', tag: 'Health' },
   social: { icon: 'people', color: '#F472B6', route: '/modules/social', tag: 'Social' },
+  brand: { icon: 'megaphone', color: '#FB7185', route: '/modules/brand', tag: 'Brand' },
+  green: { icon: 'leaf', color: '#34D399', route: '/modules/green', tag: 'Planet' },
+  nest: { icon: 'home', color: '#FBBF24', route: '/modules/nest', tag: 'Housing' },
 };
 
 export default function Home() {
@@ -45,6 +60,10 @@ export default function Home() {
   const healthLogs = useAppStore((s) => s.healthLogs);
   const connections = useAppStore((s) => s.connections);
   const socialChallenges = useAppStore((s) => s.socialChallenges);
+  const brandProfile = useAppStore((s) => s.brandProfile);
+  const brandPosts = useAppStore((s) => s.brandPosts);
+  const greenActions = useAppStore((s) => s.greenActions);
+  const nestGoal = useAppStore((s) => s.nestGoal);
 
   const [insight, setInsight] = useState('');
   const [insightLoading, setInsightLoading] = useState(true);
@@ -55,8 +74,30 @@ export default function Home() {
   );
   const growth = useMemo(() => {
     const challengesLast7 = socialChallenges.filter((c) => c.date >= dayKey(6)).length;
-    return growthScores(careerActions, careerProfile, skills, healthLogs, connections, challengesLast7);
-  }, [careerActions, careerProfile, skills, healthLogs, connections, socialChallenges]);
+    return growthScores(
+      careerActions,
+      careerProfile,
+      skills,
+      healthLogs,
+      connections,
+      challengesLast7,
+      brandProfile,
+      brandPosts,
+      greenActions,
+      nestGoal,
+    );
+  }, [
+    careerActions,
+    careerProfile,
+    skills,
+    healthLogs,
+    connections,
+    socialChallenges,
+    brandProfile,
+    brandPosts,
+    greenActions,
+    nestGoal,
+  ]);
   const life = lifeScore(scores, growth);
   const streak = profile ? computeStreak(profile.activity_dates) : 0;
   const { level, intoLevel, forNext } = levelFromXp(profile?.xp_points ?? 0);
@@ -163,7 +204,7 @@ export default function Home() {
 
         <SectionTitle
           title="Grow your life"
-          action={<Text style={styles.phaseTag}>PHASE 2</Text>}
+          action={<Text style={styles.phaseTag}>7 MODULES</Text>}
         />
         <View style={styles.growGrid}>
           {growth.map((g) => {
@@ -192,6 +233,22 @@ export default function Home() {
             );
           })}
         </View>
+
+        <SectionTitle title="Community" />
+        <TouchableOpacity activeOpacity={0.85} onPress={() => router.push('/modules/community')}>
+          <Card style={styles.communityCard}>
+            <View style={styles.communityIcon}>
+              <Ionicons name="chatbubbles" size={22} color={colors.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.communityTitle}>Peer circles</Text>
+              <Text style={styles.communityText}>
+                Anonymous, supportive spaces for burnout, money wins, hustle & more. You're not alone.
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+          </Card>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
@@ -344,5 +401,29 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: font.tiny,
     marginBottom: spacing.sm,
+  },
+  communityCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  communityIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  communityTitle: {
+    color: colors.text,
+    fontSize: font.body,
+    fontWeight: '700',
+  },
+  communityText: {
+    color: colors.muted,
+    fontSize: font.small,
+    marginTop: 2,
+    lineHeight: 18,
   },
 });

@@ -103,11 +103,71 @@ export interface CareerProfile {
   updated_at: string; // ISO timestamp
 }
 
-export type GrowthKey = 'career' | 'skills' | 'health' | 'social';
+export type GrowthKey =
+  | 'career'
+  | 'skills'
+  | 'health'
+  | 'social'
+  | 'brand'
+  | 'green'
+  | 'nest';
 
 export interface GrowthScore {
   key: GrowthKey;
   label: string;
   score: number; // 0–100
   hasData: boolean;
+}
+
+// ── Phase 3 (Expansion) ─────────────────────────────────────────────
+
+/** BrandSelf: personal-brand identity, set once. */
+export interface BrandProfile {
+  pillars: string[]; // up to 3 topics you want to be known for
+  bio: string; // one-line personal pitch
+  updated_at: string; // ISO timestamp
+}
+
+export interface BrandPost {
+  id: string;
+  platform: string; // e.g. TikTok, Instagram, LinkedIn, YouTube, X
+  note: string;
+  date: string; // yyyy-MM-dd
+  created_at: string; // ISO timestamp
+}
+
+export interface GreenAction {
+  id: string;
+  category: string; // transport | food | waste | energy | shopping
+  note: string;
+  date: string; // yyyy-MM-dd
+  created_at: string; // ISO timestamp
+}
+
+/** NestUp: a housing / independence goal, set once. */
+export interface NestGoal {
+  title: string; // e.g. "Move into my own place"
+  target_amount: number; // deposit / savings target
+  saved_amount: number;
+  target_date: string; // yyyy-MM-dd (optional, '' if unset)
+  checklist: string[]; // completed readiness-checklist keys
+  updated_at: string; // ISO timestamp
+}
+
+export interface NestContribution {
+  id: string;
+  amount: number;
+  date: string; // yyyy-MM-dd
+  created_at: string; // ISO timestamp
+}
+
+/** Community: a post the user wrote in a peer circle (stored locally). */
+export interface CommunityPost {
+  id: string;
+  circle: string; // circle key
+  handle: string; // anonymous display handle
+  text: string;
+  likes: number;
+  likedByMe: boolean;
+  created_at: string; // ISO timestamp
 }

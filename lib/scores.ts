@@ -1,11 +1,15 @@
 import {
+  BrandPost,
+  BrandProfile,
   CareerAction,
   CareerProfile,
   Connection,
+  GreenAction,
   GrowthScore,
   HealthLog,
   MoodLog,
   ModuleScore,
+  NestGoal,
   Profile,
   SideHustle,
   Skill,
@@ -132,6 +136,42 @@ export function socialScore(connections: Connection[], challengesLast7: number):
   return clamp(connectionPts + challengePts, 0, 100);
 }
 
+// ── Phase 3 (Expansion) module scores ───────────────────────────────
+
+/** BrandSelf (0–100): profile completeness + recent posting consistency. */
+export function brandScore(brand: BrandProfile | null, posts: BrandPost[]): number {
+  if (!brand && posts.length === 0) return 0;
+  let setupPts = 0;
+  if (brand) {
+    setupPts += clamp(brand.pillars.length, 0, 3) * 8; // up to 24
+    if (brand.bio.trim().length > 0) setupPts += 16; // 40 total for a full profile
+  }
+  const recent = posts.filter((p) => p.date >= dayKey(29)).length;
+  const consistencyPts = clamp(Math.round((recent / 12) * 60), 0, 60); // ~3 posts/week = full
+  return clamp(setupPts + consistencyPts, 0, 100);
+}
+
+/** Greenprint (0–100): green actions this week + variety of categories. */
+export function greenScore(actions: GreenAction[]): number {
+  if (actions.length === 0) return 0;
+  const week = actions.filter((a) => a.date >= dayKey(6));
+  const volumePts = clamp(Math.round((week.length / 10) * 70), 0, 70); // ~10/week = full
+  const variety = new Set(week.map((a) => a.category)).size;
+  const varietyPts = clamp(variety * 6, 0, 30); // all 5 categories = 30
+  return clamp(volumePts + varietyPts, 0, 100);
+}
+
+/** NestUp (0–100): deposit progress + readiness-checklist completion. */
+export function nestScore(nest: NestGoal | null): number {
+  if (!nest) return 0;
+  const savingsPts =
+    nest.target_amount > 0
+      ? clamp(Math.round((nest.saved_amount / nest.target_amount) * 60), 0, 60)
+      : 0;
+  const checklistPts = clamp(Math.round((nest.checklist.length / 6) * 40), 0, 40);
+  return clamp(savingsPts + checklistPts, 0, 100);
+}
+
 export function growthScores(
   actions: CareerAction[],
   career: CareerProfile | null,
@@ -139,6 +179,10 @@ export function growthScores(
   health: HealthLog[],
   connections: Connection[],
   challengesLast7: number,
+  brand: BrandProfile | null,
+  brandPosts: BrandPost[],
+  greenActions: GreenAction[],
+  nest: NestGoal | null,
 ): GrowthScore[] {
   return [
     {
@@ -155,6 +199,14 @@ export function growthScores(
       score: socialScore(connections, challengesLast7),
       hasData: connections.length > 0 || challengesLast7 > 0,
     },
+    {
+      key: 'brand',
+      label: 'BrandSelf',
+      score: brandScore(brand, brandPosts),
+      hasData: !!brand || brandPosts.length > 0,
+    },
+    { key: 'green', label: 'Greenprint', score: greenScore(greenActions), hasData: greenActions.length > 0 },
+    { key: 'nest', label: 'NestUp', score: nestScore(nest), hasData: !!nest },
   ];
 }
 

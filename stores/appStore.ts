@@ -1,13 +1,19 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  BrandPost,
+  BrandProfile,
   CareerAction,
   CareerActionType,
   CareerProfile,
+  CommunityPost,
   Connection,
+  GreenAction,
   HealthLog,
   JournalEntry,
   MoodLog,
+  NestContribution,
+  NestGoal,
   Profile,
   SideHustle,
   Skill,
@@ -38,6 +44,13 @@ interface PersistedState {
   healthLogs: HealthLog[];
   connections: Connection[];
   socialChallenges: SocialChallengeLog[];
+  // Phase 3 (Expansion)
+  brandProfile: BrandProfile | null;
+  brandPosts: BrandPost[];
+  greenActions: GreenAction[];
+  nestGoal: NestGoal | null;
+  nestContributions: NestContribution[];
+  communityPosts: CommunityPost[];
 }
 
 export interface HealthInput {
@@ -78,6 +91,15 @@ interface AppState extends PersistedState {
   saveHealthToday: (input: HealthInput) => Promise<void>;
   toggleSocialChallenge: (key: string, xp: number) => Promise<void>;
   addConnection: (name: string, context: string) => Promise<void>;
+  // Phase 3 (Expansion)
+  saveBrandProfile: (pillars: string[], bio: string) => Promise<void>;
+  addBrandPost: (platform: string, note: string) => Promise<void>;
+  logGreenAction: (category: string, note: string, xp: number) => Promise<void>;
+  setNestGoal: (title: string, targetAmount: number, targetDate: string) => Promise<void>;
+  addNestContribution: (amount: number) => Promise<void>;
+  toggleNestChecklist: (key: string) => Promise<void>;
+  addCommunityPost: (circle: string, handle: string, text: string) => Promise<void>;
+  toggleCommunityLike: (id: string) => Promise<void>;
   clearUnlocked: () => void;
   signOutLocal: () => Promise<void>;
 }
@@ -95,6 +117,12 @@ function emptyState(): PersistedState {
     healthLogs: [],
     connections: [],
     socialChallenges: [],
+    brandProfile: null,
+    brandPosts: [],
+    greenActions: [],
+    nestGoal: null,
+    nestContributions: [],
+    communityPosts: [],
   };
 }
 
@@ -111,6 +139,12 @@ async function persist(state: PersistedState): Promise<void> {
     healthLogs: state.healthLogs,
     connections: state.connections,
     socialChallenges: state.socialChallenges,
+    brandProfile: state.brandProfile,
+    brandPosts: state.brandPosts,
+    greenActions: state.greenActions,
+    nestGoal: state.nestGoal,
+    nestContributions: state.nestContributions,
+    communityPosts: state.communityPosts,
   };
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
 }
@@ -156,6 +190,12 @@ export const useAppStore = create<AppState>((set, get) => {
       healthLogs: changes.healthLogs ?? prev.healthLogs,
       connections: changes.connections ?? prev.connections,
       socialChallenges: changes.socialChallenges ?? prev.socialChallenges,
+      brandProfile: changes.brandProfile !== undefined ? changes.brandProfile : prev.brandProfile,
+      brandPosts: changes.brandPosts ?? prev.brandPosts,
+      greenActions: changes.greenActions ?? prev.greenActions,
+      nestGoal: changes.nestGoal !== undefined ? changes.nestGoal : prev.nestGoal,
+      nestContributions: changes.nestContributions ?? prev.nestContributions,
+      communityPosts: changes.communityPosts ?? prev.communityPosts,
     };
     set({ ...next, lastUnlocked: unlocked.length ? unlocked : prev.lastUnlocked });
     await persist(next);
@@ -406,6 +446,119 @@ export const useAppStore = create<AppState>((set, get) => {
         { connections: [row, ...get().connections] },
         { xp: 15, achievement: isFirst ? 'first_social' : undefined },
       );
+    },
+
+    // ── Phase 3: BrandSelf ──────────────────────────────────────────
+    saveBrandProfile: async (pillars, bio) => {
+      const brandProfile: BrandProfile = {
+        pillars: pillars.slice(0, 3),
+        bio: bio.trim(),
+        updated_at: new Date().toISOString(),
+      };
+      const isFirst = !get().brandProfile && get().brandPosts.length === 0;
+      await commit({ brandProfile }, { xp: 10, achievement: isFirst ? 'first_brand' : undefined });
+    },
+
+    addBrandPost: async (platform, note) => {
+      const row: BrandPost = {
+        id: uid(),
+        platform,
+        note: note.trim(),
+        date: todayKey(),
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = !get().brandProfile && get().brandPosts.length === 0;
+      await commit(
+        { brandPosts: [row, ...get().brandPosts] },
+        { xp: 15, achievement: isFirst ? 'first_brand' : undefined },
+      );
+    },
+
+    // ── Phase 3: Greenprint ─────────────────────────────────────────
+    logGreenAction: async (category, note, xp) => {
+      const row: GreenAction = {
+        id: uid(),
+        category,
+        note: note.trim(),
+        date: todayKey(),
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = get().greenActions.length === 0;
+      await commit(
+        { greenActions: [row, ...get().greenActions] },
+        { xp, achievement: isFirst ? 'first_green' : undefined },
+      );
+      void cloudInsert('green_actions', { category: row.category, note: row.note, date: row.date });
+    },
+
+    // ── Phase 3: NestUp ─────────────────────────────────────────────
+    setNestGoal: async (title, targetAmount, targetDate) => {
+      const existing = get().nestGoal;
+      const nestGoal: NestGoal = {
+        title: title.trim() || 'My housing goal',
+        target_amount: targetAmount > 0 ? targetAmount : 0,
+        saved_amount: existing?.saved_amount ?? 0,
+        target_date: targetDate,
+        checklist: existing?.checklist ?? [],
+        updated_at: new Date().toISOString(),
+      };
+      await commit({ nestGoal }, { xp: 10, achievement: existing ? undefined : 'first_nest' });
+    },
+
+    addNestContribution: async (amount) => {
+      const nest = get().nestGoal;
+      if (!nest) return;
+      const row: NestContribution = {
+        id: uid(),
+        amount: Math.abs(amount),
+        date: todayKey(),
+        created_at: new Date().toISOString(),
+      };
+      await commit(
+        {
+          nestContributions: [row, ...get().nestContributions],
+          nestGoal: { ...nest, saved_amount: nest.saved_amount + Math.abs(amount), updated_at: new Date().toISOString() },
+        },
+        { xp: 15 },
+      );
+    },
+
+    toggleNestChecklist: async (key) => {
+      const nest = get().nestGoal;
+      if (!nest) return;
+      const has = nest.checklist.includes(key);
+      const checklist = has ? nest.checklist.filter((k) => k !== key) : [...nest.checklist, key];
+      await commit(
+        { nestGoal: { ...nest, checklist, updated_at: new Date().toISOString() } },
+        { xp: has ? 0 : 10 },
+      );
+    },
+
+    // ── Phase 3: Community ──────────────────────────────────────────
+    addCommunityPost: async (circle, handle, text) => {
+      const row: CommunityPost = {
+        id: uid(),
+        circle,
+        handle,
+        text: text.trim(),
+        likes: 0,
+        likedByMe: false,
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = get().communityPosts.length === 0;
+      await commit(
+        { communityPosts: [row, ...get().communityPosts] },
+        { xp: 15, achievement: isFirst ? 'first_community' : undefined },
+      );
+    },
+
+    toggleCommunityLike: async (id) => {
+      const communityPosts = get().communityPosts.map((p) =>
+        p.id === id
+          ? { ...p, likedByMe: !p.likedByMe, likes: p.likes + (p.likedByMe ? -1 : 1) }
+          : p,
+      );
+      await commit({ communityPosts });
     },
 
     clearUnlocked: () => set({ lastUnlocked: [] }),

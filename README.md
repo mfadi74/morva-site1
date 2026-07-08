@@ -35,6 +35,17 @@ Accessed from the **Grow your life** section on Home; each feeds the Life Score.
 | 💪 **RootHealth** (Health) | Screen-time-driven burnout | Daily sleep/water/movement/screen logging, health score, weekly trend, AI nudge |
 | 🫂 **Connekt** (Social) | Near-universal networking fear | Daily "brave move" challenges, connection log, AI conversation starters |
 
+### Phase 3 — Expansion layer (also built ✅)
+
+The **Grow your life** grid now holds all 7 modules; the **Community** section opens the peer circles.
+
+| Module | Pain point | Key features |
+| --- | --- | --- |
+| 📣 **BrandSelf** (Personal brand) | 44% use social as their main business tool | Brand pillars + one-line bio, content-post streak by platform, AI content-idea coach |
+| 🌱 **Greenprint** (Sustainability) | Climate is a top Gen Z concern | One-tap green actions by category, weekly impact chart & streak, AI eco tip |
+| 🏠 **NestUp** (Housing) | Only 3.9% can rent alone | Housing goal + deposit savings tracker, 6-point readiness checklist, AI housing coach |
+| 💬 **Community Layer** | Isolation & loneliness | Anonymous peer circles (burnout, money, hustle, study, anxiety), post + like, AI-safe framing |
+
 **Cross-cutting, by design (straight from the research):**
 - **Dark mode by default** — 82% of Gen Z expect it.
 - **AI front-and-centre** — a coach card on every module, not hidden away.
@@ -159,8 +170,10 @@ instructions for both platforms (the app runs as a web app there instantly).
 
 - **Phase 1 — MVP (done ✅):** MoneyMap, Stillwell, LaunchPad, AI Goals + Life Score.
 - **Phase 2 — Growth (core modules done ✅):** CareerGPS, Sprinto (skills), RootHealth, Connekt — all four built and wired into the Life Score. Still to come this phase: Plaid bank sync, therapist booking, Arabic + Spanish.
-- **Phase 3 — Expansion:** BrandSelf, Greenprint, NestUp, community layer.
+- **Phase 3 — Expansion (core modules done ✅):** BrandSelf, Greenprint, NestUp, and the Community layer — all built. Still to come this phase: real-time shared circles + moderation.
 - **Phase 4 — Scale:** B2B wellness, multilingual, white-label, AchieveOS API.
+
+**All 10 life modules from the guide are now implemented**, plus the AI Life-Score engine, gamification, and the community layer.
 
 ---
 

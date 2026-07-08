@@ -22,7 +22,7 @@ export function ModuleScreen({
   subtitle: string;
   icon: keyof typeof Ionicons.glyphMap;
   color: string;
-  score: number;
+  score?: number;
   children: React.ReactNode;
 }) {
   return (
@@ -42,14 +42,18 @@ export function ModuleScreen({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
         </View>
-        <View style={styles.scoreWrap}>
-          <Text style={[styles.scoreValue, { color }]}>{score}</Text>
-          <Text style={styles.scoreLabel}>SCORE</Text>
+        {score !== undefined && (
+          <View style={styles.scoreWrap}>
+            <Text style={[styles.scoreValue, { color }]}>{score}</Text>
+            <Text style={styles.scoreLabel}>SCORE</Text>
+          </View>
+        )}
+      </View>
+      {score !== undefined && (
+        <View style={styles.scoreBar}>
+          <ProgressBar value={score} color={color} height={5} />
         </View>
-      </View>
-      <View style={styles.scoreBar}>
-        <ProgressBar value={score} color={color} height={5} />
-      </View>
+      )}
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {children}
       </ScrollView>

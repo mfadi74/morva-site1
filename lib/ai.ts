@@ -15,7 +15,11 @@ export type CoachContext =
   | 'career'
   | 'skills'
   | 'health'
-  | 'social';
+  | 'social'
+  | 'brand'
+  | 'green'
+  | 'nest'
+  | 'community';
 
 const SYSTEM_PROMPT = `You are the AI coach inside AchieveOS, a life super-app for Gen Z.
 Help users with mental health, money, side hustles, and personal growth.

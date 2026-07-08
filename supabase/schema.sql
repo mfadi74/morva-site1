@@ -176,6 +176,68 @@ create policy "Users see own skills"      on public.skills         for all using
 create policy "Users see own health"      on public.health_logs    for all using (auth.uid() = user_id);
 create policy "Users see own connections" on public.connections    for all using (auth.uid() = user_id);
 
+-- ─────────────────────────────────────────────────────────────────────
+-- Phase 3 (Expansion): BrandSelf, Greenprint, NestUp, Community
+-- ─────────────────────────────────────────────────────────────────────
+
+-- BrandSelf: logged content posts
+create table if not exists public.brand_posts (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  platform text,
+  note text,
+  date date,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- Greenprint: logged eco actions
+create table if not exists public.green_actions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  category text,
+  note text,
+  date date,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- NestUp: savings contributions toward a housing goal
+create table if not exists public.nest_contributions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  amount decimal(10,2),
+  date date,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- Community: posts in peer circles.
+-- Note: for a real shared community, relax the SELECT policy so members can
+-- read each other's posts within a circle (moderation required). The default
+-- below keeps posts private per-user, matching the app's local-first demo.
+create table if not exists public.community_posts (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  circle text,
+  handle text,
+  text text,
+  likes integer default 0,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+alter table public.brand_posts        enable row level security;
+alter table public.green_actions      enable row level security;
+alter table public.nest_contributions enable row level security;
+alter table public.community_posts    enable row level security;
+
+drop policy if exists "Users see own brand posts"    on public.brand_posts;
+drop policy if exists "Users see own green actions"  on public.green_actions;
+drop policy if exists "Users see own nest"           on public.nest_contributions;
+drop policy if exists "Users see own community"      on public.community_posts;
+
+create policy "Users see own brand posts"    on public.brand_posts        for all using (auth.uid() = user_id);
+create policy "Users see own green actions"  on public.green_actions      for all using (auth.uid() = user_id);
+create policy "Users see own nest"           on public.nest_contributions for all using (auth.uid() = user_id);
+create policy "Users see own community"      on public.community_posts    for all using (auth.uid() = user_id);
+
 -- Auto-create a profile row when a new auth user signs up
 create or replace function public.handle_new_user()
 returns trigger as $$
