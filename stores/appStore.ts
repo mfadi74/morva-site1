@@ -1,11 +1,29 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { JournalEntry, MoodLog, Profile, SideHustle, Transaction } from '@/types';
-import { ACHIEVEMENTS } from '@/constants/content';
+import {
+  CareerAction,
+  CareerActionType,
+  CareerProfile,
+  Connection,
+  HealthLog,
+  JournalEntry,
+  MoodLog,
+  Profile,
+  SideHustle,
+  Skill,
+  Transaction,
+} from '@/types';
+import { ACHIEVEMENTS, CAREER_ACTIONS } from '@/constants/content';
 import { cloudInsert } from '@/lib/supabase';
 import { todayKey, uid } from '@/lib/utils';
 
 const STORAGE_KEY = 'achieveos:v1';
+
+/** A completed daily social challenge (Connekt). */
+export interface SocialChallengeLog {
+  key: string;
+  date: string; // yyyy-MM-dd
+}
 
 interface PersistedState {
   profile: Profile | null;
@@ -13,6 +31,20 @@ interface PersistedState {
   moods: MoodLog[];
   journal: JournalEntry[];
   hustle: SideHustle | null;
+  // Phase 2 (Growth)
+  careerActions: CareerAction[];
+  careerProfile: CareerProfile | null;
+  skills: Skill[];
+  healthLogs: HealthLog[];
+  connections: Connection[];
+  socialChallenges: SocialChallengeLog[];
+}
+
+export interface HealthInput {
+  sleep_hours: number;
+  water_cups: number;
+  moved_minutes: number;
+  screen_hours: number;
 }
 
 export interface NewTransaction {
@@ -37,25 +69,50 @@ interface AppState extends PersistedState {
   startHustle: (name: string, type: string, goalIncome: number) => Promise<void>;
   completeRoadmapStep: () => Promise<void>;
   logHustleIncome: (amount: number) => Promise<void>;
+  // Phase 2 (Growth)
+  saveCareerProfile: (targetRole: string, energy: number, workload: number) => Promise<void>;
+  logCareerAction: (type: CareerActionType, note: string) => Promise<void>;
+  addSkill: (name: string, category: string, targetHours: number) => Promise<void>;
+  logSkillHours: (id: string, hours: number) => Promise<void>;
+  deleteSkill: (id: string) => Promise<void>;
+  saveHealthToday: (input: HealthInput) => Promise<void>;
+  toggleSocialChallenge: (key: string, xp: number) => Promise<void>;
+  addConnection: (name: string, context: string) => Promise<void>;
   clearUnlocked: () => void;
   signOutLocal: () => Promise<void>;
 }
 
 function emptyState(): PersistedState {
-  return { profile: null, transactions: [], moods: [], journal: [], hustle: null };
+  return {
+    profile: null,
+    transactions: [],
+    moods: [],
+    journal: [],
+    hustle: null,
+    careerActions: [],
+    careerProfile: null,
+    skills: [],
+    healthLogs: [],
+    connections: [],
+    socialChallenges: [],
+  };
 }
 
 async function persist(state: PersistedState): Promise<void> {
-  await AsyncStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({
-      profile: state.profile,
-      transactions: state.transactions,
-      moods: state.moods,
-      journal: state.journal,
-      hustle: state.hustle,
-    }),
-  );
+  const snapshot: PersistedState = {
+    profile: state.profile,
+    transactions: state.transactions,
+    moods: state.moods,
+    journal: state.journal,
+    hustle: state.hustle,
+    careerActions: state.careerActions,
+    careerProfile: state.careerProfile,
+    skills: state.skills,
+    healthLogs: state.healthLogs,
+    connections: state.connections,
+    socialChallenges: state.socialChallenges,
+  };
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
 }
 
 export const useAppStore = create<AppState>((set, get) => {
@@ -93,6 +150,12 @@ export const useAppStore = create<AppState>((set, get) => {
       moods: changes.moods ?? prev.moods,
       journal: changes.journal ?? prev.journal,
       hustle: changes.hustle !== undefined ? changes.hustle : prev.hustle,
+      careerActions: changes.careerActions ?? prev.careerActions,
+      careerProfile: changes.careerProfile !== undefined ? changes.careerProfile : prev.careerProfile,
+      skills: changes.skills ?? prev.skills,
+      healthLogs: changes.healthLogs ?? prev.healthLogs,
+      connections: changes.connections ?? prev.connections,
+      socialChallenges: changes.socialChallenges ?? prev.socialChallenges,
     };
     set({ ...next, lastUnlocked: unlocked.length ? unlocked : prev.lastUnlocked });
     await persist(next);
@@ -235,6 +298,113 @@ export const useAppStore = create<AppState>((set, get) => {
           },
         },
         { xp: 20, achievement: 'first_income' },
+      );
+    },
+
+    // ── Phase 2: CareerGPS ──────────────────────────────────────────
+    saveCareerProfile: async (targetRole, energy, workload) => {
+      const careerProfile: CareerProfile = {
+        target_role: targetRole.trim(),
+        energy,
+        workload,
+        updated_at: new Date().toISOString(),
+      };
+      const isFirst = !get().careerProfile && get().careerActions.length === 0;
+      await commit({ careerProfile }, { xp: 10, achievement: isFirst ? 'first_career' : undefined });
+    },
+
+    logCareerAction: async (type, note) => {
+      const row: CareerAction = {
+        id: uid(),
+        type,
+        note: note.trim(),
+        date: todayKey(),
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = get().careerActions.length === 0 && !get().careerProfile;
+      const xp = CAREER_ACTIONS.find((a) => a.key === type)?.xp ?? 10;
+      await commit(
+        { careerActions: [row, ...get().careerActions] },
+        { xp, achievement: isFirst ? 'first_career' : undefined },
+      );
+    },
+
+    // ── Phase 2: Sprinto (skills) ───────────────────────────────────
+    addSkill: async (name, category, targetHours) => {
+      const row: Skill = {
+        id: uid(),
+        name: name.trim(),
+        category,
+        target_hours: targetHours > 0 ? targetHours : 20,
+        logged_hours: 0,
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = get().skills.length === 0;
+      await commit({ skills: [row, ...get().skills] }, { xp: 15, achievement: isFirst ? 'first_skill' : undefined });
+    },
+
+    logSkillHours: async (id, hours) => {
+      const skills = get().skills.map((s) =>
+        s.id === id ? { ...s, logged_hours: s.logged_hours + Math.abs(hours) } : s,
+      );
+      await commit({ skills }, { xp: 10 });
+    },
+
+    deleteSkill: async (id) => {
+      await commit({ skills: get().skills.filter((s) => s.id !== id) });
+    },
+
+    // ── Phase 2: RootHealth ─────────────────────────────────────────
+    saveHealthToday: async (input) => {
+      const today = todayKey();
+      const existing = get().healthLogs.find((l) => l.date === today);
+      const row: HealthLog = { date: today, ...input, updated_at: new Date().toISOString() };
+      const healthLogs = existing
+        ? get().healthLogs.map((l) => (l.date === today ? row : l))
+        : [row, ...get().healthLogs];
+      await commit(
+        { healthLogs },
+        { xp: existing ? 0 : 15, achievement: get().healthLogs.length === 0 ? 'first_health' : undefined },
+      );
+      void cloudInsert('health_logs', {
+        sleep_hours: input.sleep_hours,
+        water_cups: input.water_cups,
+        moved_minutes: input.moved_minutes,
+        screen_hours: input.screen_hours,
+        date: today,
+      });
+    },
+
+    // ── Phase 2: Connekt ────────────────────────────────────────────
+    toggleSocialChallenge: async (key, xp) => {
+      const today = todayKey();
+      const done = get().socialChallenges.some((c) => c.key === key && c.date === today);
+      if (done) {
+        // Un-complete: remove the record (no XP change to keep it simple/honest).
+        await commit({
+          socialChallenges: get().socialChallenges.filter((c) => !(c.key === key && c.date === today)),
+        });
+        return;
+      }
+      const isFirst = get().socialChallenges.length === 0 && get().connections.length === 0;
+      await commit(
+        { socialChallenges: [{ key, date: today }, ...get().socialChallenges] },
+        { xp, achievement: isFirst ? 'first_social' : undefined },
+      );
+    },
+
+    addConnection: async (name, context) => {
+      const row: Connection = {
+        id: uid(),
+        name: name.trim(),
+        context: context.trim(),
+        date: todayKey(),
+        created_at: new Date().toISOString(),
+      };
+      const isFirst = get().connections.length === 0 && get().socialChallenges.length === 0;
+      await commit(
+        { connections: [row, ...get().connections] },
+        { xp: 15, achievement: isFirst ? 'first_social' : undefined },
       );
     },
 

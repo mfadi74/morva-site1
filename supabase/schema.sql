@@ -114,6 +114,68 @@ create policy "Users see own journal"      on public.journal_entries for all usi
 create policy "Users see own hustles"      on public.side_hustles    for all using (auth.uid() = user_id);
 create policy "Users see own achievements" on public.achievements    for all using (auth.uid() = user_id);
 
+-- ─────────────────────────────────────────────────────────────────────
+-- Phase 2 (Growth): CareerGPS, Sprinto, RootHealth, Connekt
+-- ─────────────────────────────────────────────────────────────────────
+
+-- CareerGPS: logged career moves
+create table if not exists public.career_actions (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  type text,   -- 'application' | 'networking' | 'interview' | 'learning'
+  note text,
+  date date,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- Sprinto: skills being built
+create table if not exists public.skills (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  name text,
+  category text,
+  target_hours integer default 20,
+  logged_hours numeric default 0,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- RootHealth: one row per day of habits
+create table if not exists public.health_logs (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  date date,
+  sleep_hours numeric,
+  water_cups integer,
+  moved_minutes integer,
+  screen_hours numeric,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+-- Connekt: logged connections
+create table if not exists public.connections (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles on delete cascade,
+  name text,
+  context text,
+  date date,
+  created_at timestamp with time zone default timezone('utc', now())
+);
+
+alter table public.career_actions enable row level security;
+alter table public.skills         enable row level security;
+alter table public.health_logs    enable row level security;
+alter table public.connections    enable row level security;
+
+drop policy if exists "Users see own career"      on public.career_actions;
+drop policy if exists "Users see own skills"      on public.skills;
+drop policy if exists "Users see own health"      on public.health_logs;
+drop policy if exists "Users see own connections" on public.connections;
+
+create policy "Users see own career"      on public.career_actions for all using (auth.uid() = user_id);
+create policy "Users see own skills"      on public.skills         for all using (auth.uid() = user_id);
+create policy "Users see own health"      on public.health_logs    for all using (auth.uid() = user_id);
+create policy "Users see own connections" on public.connections    for all using (auth.uid() = user_id);
+
 -- Auto-create a profile row when a new auth user signs up
 create or replace function public.handle_new_user()
 returns trigger as $$

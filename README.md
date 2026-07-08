@@ -22,7 +22,18 @@ back. Built with **React Native + Expo**, so a single codebase runs on
 | 💚 **Stillwell** (Mental health) | 40% stressed/anxious most of the time | 7-point mood check-in, emotion tags, private journaling with prompts, warm AI support, weekly mood chart |
 | 💰 **MoneyMap** (Financial health) | 62% money-stressed 3+ days/week | Income/expense logging, net balance, Financial Health Score, category breakdown, AI spending tips |
 | 🚀 **LaunchPad** (Side hustle) | 48–70% want a side hustle | 6 hustle lanes, a 30-day launch roadmap with XP, income tracker, AI hustle coach |
-| 👤 **Profile** | Motivation & identity | Level/XP, streaks, a 10-badge achievement system, live app status |
+| 👤 **Profile** | Motivation & identity | Level/XP, streaks, a 14-badge achievement system, live app status |
+
+### Phase 2 — Growth layer (also built ✅)
+
+Accessed from the **Grow your life** section on Home; each feeds the Life Score.
+
+| Module | Pain point | Key features |
+| --- | --- | --- |
+| 🧭 **CareerGPS** (Career) | 86% report burnout | Target role, action tracker (applications/networking/interviews), energy-vs-workload burnout check, AI career coach |
+| 🎓 **Sprinto** (Skills) | 19% feel unprepared for work | Skill tracks across 6 categories, log practice hours toward a target, AI learning-path coach |
+| 💪 **RootHealth** (Health) | Screen-time-driven burnout | Daily sleep/water/movement/screen logging, health score, weekly trend, AI nudge |
+| 🫂 **Connekt** (Social) | Near-universal networking fear | Daily "brave move" challenges, connection log, AI conversation starters |
 
 **Cross-cutting, by design (straight from the research):**
 - **Dark mode by default** — 82% of Gen Z expect it.
@@ -146,8 +157,8 @@ instructions for both platforms (the app runs as a web app there instantly).
 
 ## Roadmap (from the guide)
 
-- **Phase 1 — MVP (done here):** MoneyMap, Stillwell, LaunchPad, AI Goals + Life Score.
-- **Phase 2 — Growth:** CareerGPS, Sprinto (skills), RootHealth, Connekt; Plaid bank sync; therapist booking; Arabic + Spanish.
+- **Phase 1 — MVP (done ✅):** MoneyMap, Stillwell, LaunchPad, AI Goals + Life Score.
+- **Phase 2 — Growth (core modules done ✅):** CareerGPS, Sprinto (skills), RootHealth, Connekt — all four built and wired into the Life Score. Still to come this phase: Plaid bank sync, therapist booking, Arabic + Spanish.
 - **Phase 3 — Expansion:** BrandSelf, Greenprint, NestUp, community layer.
 - **Phase 4 — Scale:** B2B wellness, multilingual, white-label, AchieveOS API.
 

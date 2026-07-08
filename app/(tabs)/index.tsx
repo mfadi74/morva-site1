@@ -8,10 +8,11 @@ import { Card, ProgressBar, SectionTitle } from '@/components/ui';
 import { ScoreRing } from '@/components/ScoreRing';
 import { CoachCard } from '@/components/CoachCard';
 import { colors, font, radius, spacing } from '@/constants/theme';
-import { lifeScore, moduleScores } from '@/lib/scores';
+import { growthScores, lifeScore, moduleScores } from '@/lib/scores';
 import { askCoach, CoachContext } from '@/lib/ai';
-import { computeStreak, greeting, levelFromXp } from '@/lib/utils';
+import { computeStreak, dayKey, greeting, levelFromXp } from '@/lib/utils';
 import { useAppStore } from '@/stores/appStore';
+import { GrowthKey } from '@/types';
 
 const MODULE_META: Record<
   string,
@@ -23,11 +24,27 @@ const MODULE_META: Record<
   momentum: { icon: 'flame', color: colors.primary, route: null },
 };
 
+const GROWTH_META: Record<
+  GrowthKey,
+  { icon: keyof typeof Ionicons.glyphMap; color: string; route: '/modules/career' | '/modules/skills' | '/modules/health' | '/modules/social'; tag: string }
+> = {
+  career: { icon: 'compass', color: '#38BDF8', route: '/modules/career', tag: 'Career' },
+  skills: { icon: 'school', color: '#A78BFA', route: '/modules/skills', tag: 'Skills' },
+  health: { icon: 'fitness', color: '#34D399', route: '/modules/health', tag: 'Health' },
+  social: { icon: 'people', color: '#F472B6', route: '/modules/social', tag: 'Social' },
+};
+
 export default function Home() {
   const profile = useAppStore((s) => s.profile);
   const transactions = useAppStore((s) => s.transactions);
   const moods = useAppStore((s) => s.moods);
   const hustle = useAppStore((s) => s.hustle);
+  const careerActions = useAppStore((s) => s.careerActions);
+  const careerProfile = useAppStore((s) => s.careerProfile);
+  const skills = useAppStore((s) => s.skills);
+  const healthLogs = useAppStore((s) => s.healthLogs);
+  const connections = useAppStore((s) => s.connections);
+  const socialChallenges = useAppStore((s) => s.socialChallenges);
 
   const [insight, setInsight] = useState('');
   const [insightLoading, setInsightLoading] = useState(true);
@@ -36,7 +53,11 @@ export default function Home() {
     () => (profile ? moduleScores(profile, transactions, moods, hustle) : []),
     [profile, transactions, moods, hustle],
   );
-  const life = lifeScore(scores);
+  const growth = useMemo(() => {
+    const challengesLast7 = socialChallenges.filter((c) => c.date >= dayKey(6)).length;
+    return growthScores(careerActions, careerProfile, skills, healthLogs, connections, challengesLast7);
+  }, [careerActions, careerProfile, skills, healthLogs, connections, socialChallenges]);
+  const life = lifeScore(scores, growth);
   const streak = profile ? computeStreak(profile.activity_dates) : 0;
   const { level, intoLevel, forNext } = levelFromXp(profile?.xp_points ?? 0);
 
@@ -139,6 +160,38 @@ export default function Home() {
             </TouchableOpacity>
           );
         })}
+
+        <SectionTitle
+          title="Grow your life"
+          action={<Text style={styles.phaseTag}>PHASE 2</Text>}
+        />
+        <View style={styles.growGrid}>
+          {growth.map((g) => {
+            const meta = GROWTH_META[g.key];
+            return (
+              <TouchableOpacity
+                key={g.key}
+                style={styles.growCard}
+                activeOpacity={0.8}
+                onPress={() => router.push(meta.route)}
+              >
+                <View style={styles.growTop}>
+                  <View style={[styles.growIcon, { backgroundColor: `${meta.color}22` }]}>
+                    <Ionicons name={meta.icon} size={18} color={meta.color} />
+                  </View>
+                  {g.hasData ? (
+                    <Text style={[styles.growScore, { color: meta.color }]}>{g.score}</Text>
+                  ) : (
+                    <Ionicons name="add-circle" size={20} color={colors.muted} />
+                  )}
+                </View>
+                <Text style={styles.growName}>{g.label}</Text>
+                <Text style={styles.growTag}>{meta.tag}</Text>
+                <ProgressBar value={g.score} color={meta.color} height={4} />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -239,5 +292,57 @@ const styles = StyleSheet.create({
   moduleScore: {
     fontSize: font.body,
     fontWeight: '800',
+  },
+  phaseTag: {
+    color: colors.primary,
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    backgroundColor: colors.primarySoft,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+  },
+  growGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+  },
+  growCard: {
+    width: '48%',
+    flexGrow: 1,
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+  },
+  growTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+  growIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  growScore: {
+    fontSize: font.subheading,
+    fontWeight: '800',
+  },
+  growName: {
+    color: colors.text,
+    fontSize: font.body,
+    fontWeight: '700',
+  },
+  growTag: {
+    color: colors.muted,
+    fontSize: font.tiny,
+    marginBottom: spacing.sm,
   },
 });

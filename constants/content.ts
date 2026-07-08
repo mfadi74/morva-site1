@@ -133,6 +133,10 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { key: 'hustle_started', title: 'Founder Mode', description: 'Started your side hustle roadmap', icon: 'briefcase', xp: 30 },
   { key: 'hustle_launched', title: 'Launched!', description: 'Completed all 6 roadmap milestones', icon: 'trophy', xp: 150 },
   { key: 'first_income', title: 'First Bag', description: 'Logged side hustle income', icon: 'cash', xp: 40 },
+  { key: 'first_career', title: 'On The Grid', description: 'Logged your first career move', icon: 'compass', xp: 25 },
+  { key: 'first_skill', title: 'Student Mode', description: 'Started learning a skill', icon: 'school', xp: 25 },
+  { key: 'first_health', title: 'Body Check', description: 'Logged your first health day', icon: 'fitness', xp: 20 },
+  { key: 'first_social', title: 'Brave Move', description: 'Took your first social action', icon: 'happy', xp: 20 },
   { key: 'level_5', title: 'Level 5 Energy', description: 'Reached level 5', icon: 'star', xp: 0 },
 ];
 
@@ -169,4 +173,78 @@ export const OFFLINE_COACH = {
     "You don't need more motivation, you need a smaller first step. Shrink the task until it's easy to start.",
     'Check in daily, act weekly, review monthly. That rhythm alone puts you ahead of 90% of people.',
   ],
+  career: [
+    'Careers are built on reps, not luck. One application or one genuine message today is a rep. Do one.',
+    "Feeling burnt out? That's data, not failure. Protect one evening this week with zero work — you'll do better work for it.",
+    'Your next role rarely comes from job boards — it comes from people. DM one person in a job you admire and just ask how they got there.',
+  ],
+  skills: [
+    'Skills compound like interest. 20 focused minutes a day beats a 5-hour weekend cram every single time.',
+    "Don't learn in a vacuum — build one tiny thing with the skill this week. Projects teach faster than tutorials.",
+    "You're closer than it feels. Log today's practice, watch the bar move, and let momentum do the rest.",
+  ],
+  health: [
+    'Sleep is the cheat code. Even 30 more minutes tonight sharpens your mood, money decisions, and focus tomorrow.',
+    'Screen time and burnout travel together. Try one 20-minute walk with your phone on Do Not Disturb today.',
+    "Hydration is the most underrated mood hack. Refill your water now — future-you feels it.",
+  ],
+  social: [
+    "Confidence is a muscle, not a gift. One small brave move today — a hello, a comment, a text — is a rep.",
+    'Nobody feels ready to reach out. Send the message anyway; the awkward 10 seconds beats the lonely week.',
+    'Networking isn\'t selling — it\'s curiosity. Ask one person one real question about their world today.',
+  ],
 };
+
+// ── Phase 2: CareerGPS ──────────────────────────────────────────────
+export const CAREER_ACTIONS: { key: string; label: string; icon: string; xp: number }[] = [
+  { key: 'application', label: 'Applied to a role', icon: 'paper-plane-outline', xp: 15 },
+  { key: 'networking', label: 'Networked / reached out', icon: 'people-outline', xp: 15 },
+  { key: 'interview', label: 'Had an interview', icon: 'chatbubbles-outline', xp: 30 },
+  { key: 'learning', label: 'Learned something new', icon: 'bulb-outline', xp: 10 },
+];
+
+// ── Phase 2: Sprinto (skills) ───────────────────────────────────────
+export const SKILL_CATEGORIES: { key: string; label: string; icon: string }[] = [
+  { key: 'tech', label: 'Tech & Coding', icon: 'code-slash-outline' },
+  { key: 'creative', label: 'Design & Creative', icon: 'color-palette-outline' },
+  { key: 'business', label: 'Business & Money', icon: 'briefcase-outline' },
+  { key: 'language', label: 'Languages', icon: 'language-outline' },
+  { key: 'communication', label: 'Communication', icon: 'megaphone-outline' },
+  { key: 'wellbeing', label: 'Health & Fitness', icon: 'barbell-outline' },
+];
+
+export const SKILL_SUGGESTIONS: Record<string, string[]> = {
+  tech: ['Python', 'Web Development', 'AI & Prompting', 'Data Analysis'],
+  creative: ['Video Editing', 'Graphic Design', 'UI/UX', 'Photography'],
+  business: ['Marketing', 'Investing', 'Public Speaking', 'Sales'],
+  language: ['English', 'Spanish', 'Arabic', 'French'],
+  communication: ['Copywriting', 'Storytelling', 'Negotiation', 'Networking'],
+  wellbeing: ['Strength Training', 'Running', 'Nutrition', 'Meditation'],
+};
+
+// ── Phase 2: RootHealth ─────────────────────────────────────────────
+export const HEALTH_TARGETS = {
+  sleep_hours: 8,
+  water_cups: 8,
+  moved_minutes: 30,
+  screen_hours_max: 6, // lower is better
+};
+
+// ── Phase 2: Connekt ────────────────────────────────────────────────
+export const SOCIAL_CHALLENGES: { key: string; label: string; xp: number }[] = [
+  { key: 'greet', label: 'Start a conversation with someone new', xp: 15 },
+  { key: 'compliment', label: 'Give someone a genuine compliment', xp: 10 },
+  { key: 'reconnect', label: 'Message a friend you miss', xp: 10 },
+  { key: 'ask', label: 'Ask someone a thoughtful question', xp: 10 },
+  { key: 'share', label: 'Share an opinion in a group chat or post', xp: 15 },
+  { key: 'invite', label: 'Invite someone to hang out or call', xp: 20 },
+];
+
+export const CONVERSATION_STARTERS = [
+  "What's something you're weirdly good at?",
+  'What have you been into lately outside of work or school?',
+  'If you had a totally free weekend, what would you do?',
+  "What's the best thing you've watched or read recently?",
+  'How did you get into what you do?',
+  "What's a small win you had this week?",
+];

@@ -5,7 +5,17 @@ const model = process.env.EXPO_PUBLIC_CLAUDE_MODEL || 'claude-sonnet-5';
 
 export const isAiLive = Boolean(apiKey);
 
-export type CoachContext = 'lowMood' | 'midMood' | 'highMood' | 'money' | 'hustle' | 'general';
+export type CoachContext =
+  | 'lowMood'
+  | 'midMood'
+  | 'highMood'
+  | 'money'
+  | 'hustle'
+  | 'general'
+  | 'career'
+  | 'skills'
+  | 'health'
+  | 'social';
 
 const SYSTEM_PROMPT = `You are the AI coach inside AchieveOS, a life super-app for Gen Z.
 Help users with mental health, money, side hustles, and personal growth.
