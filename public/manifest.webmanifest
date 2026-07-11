@@ -1,0 +1,16 @@
+{
+  "name": "NORCO Executive Suite",
+  "short_name": "NORCO Suite",
+  "description": "Executive AI operating system for NORCO General Trading L.L.C. and MORVA L.L.C.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12203F",
+  "theme_color": "#12203F",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
