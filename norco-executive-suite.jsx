@@ -92,6 +92,25 @@ const STR = {
     selectUpTo: "Select up to 5 agents",
     footer: "NORCO General Trading L.L.C. · MORVA L.L.C.",
     agentsTruth: "30 agents · 1 brain · 1 truth",
+    lockWelcome: "Private executive workspace",
+    lockCreateTitle: "Create your access password",
+    lockCreateSub: "This password will be required every time the app opens on this device.",
+    lockLoginTitle: "Enter your password",
+    passPh: "Password",
+    passConfirmPh: "Confirm password",
+    createEnter: "Create & enter",
+    enter: "Enter",
+    wrongPass: "Incorrect password — try again.",
+    passMismatch: "The two passwords do not match.",
+    passTooShort: "Use at least 4 characters.",
+    lockNote: "Forgot it? Clearing this site's data in the browser resets the app (saved chats, Brain and settings on this device will be erased).",
+    lockApp: "Lock",
+    securitySection: "App password",
+    currentPassPh: "Current password",
+    newPassPh: "New password",
+    changePass: "Change password",
+    passChanged: "Password changed ✓",
+    securityHelp: "The password locks the app on each device it's opened on. Note: it protects against casual access (a colleague or a lost phone), and your keys and documents are stored only on this device.",
   },
   ar: {
     agents: "الوكلاء", boardroom: "مجلس الإدارة", brain: "عقل الشركة", ainet: "شبكة الذكاء",
@@ -161,6 +180,25 @@ const STR = {
     selectUpTo: "اختر حتى ٥ وكلاء",
     footer: "نوركو للتجارة العامة ش.ذ.م.م · مورفا ش.ذ.م.م",
     agentsTruth: "٣٠ وكيلاً · عقل واحد · حقيقة واحدة",
+    lockWelcome: "مساحة عمل تنفيذية خاصة",
+    lockCreateTitle: "أنشئ كلمة مرور الدخول",
+    lockCreateSub: "ستُطلب كلمة المرور هذه في كل مرة يُفتح فيها التطبيق على هذا الجهاز.",
+    lockLoginTitle: "أدخل كلمة المرور",
+    passPh: "كلمة المرور",
+    passConfirmPh: "تأكيد كلمة المرور",
+    createEnter: "إنشاء ودخول",
+    enter: "دخول",
+    wrongPass: "كلمة المرور غير صحيحة — حاول مجدداً.",
+    passMismatch: "كلمتا المرور غير متطابقتين.",
+    passTooShort: "استخدم ٤ أحرف على الأقل.",
+    lockNote: "نسيت كلمة المرور؟ مسح بيانات هذا الموقع من المتصفح يعيد ضبط التطبيق (ستُحذف المحادثات والعقل والإعدادات المحفوظة على هذا الجهاز).",
+    lockApp: "قفل",
+    securitySection: "كلمة مرور التطبيق",
+    currentPassPh: "كلمة المرور الحالية",
+    newPassPh: "كلمة المرور الجديدة",
+    changePass: "تغيير كلمة المرور",
+    passChanged: "تم تغيير كلمة المرور ✓",
+    securityHelp: "كلمة المرور تقفل التطبيق على كل جهاز يُفتح عليه. ملاحظة: هي حماية من الوصول العابر (زميل أو هاتف مفقود)، ومفاتيحك ومستنداتك محفوظة على هذا الجهاز فقط.",
   },
 };
 
@@ -501,27 +539,48 @@ RULES FOR ALL AGENTS:
 
 const DEFAULT_CLAUDE_MODEL = "claude-opus-4-8";
 
+// Actionable, bilingual error messages shown directly in the chat.
+const ERR_NO_KEY =
+  "The app needs your Anthropic API key to work outside Claude. Open Settings ⚙ → AI providers, paste your key from console.anthropic.com, and press Save. — يحتاج التطبيق إلى مفتاح Anthropic خارج كلود: افتح الإعدادات ⚙ ← مزوّدو الذكاء الاصطناعي، والصق المفتاح من console.anthropic.com ثم احفظ.";
+const ERR_BAD_KEY =
+  "The Anthropic API key was rejected. Check it in Settings ⚙ → AI providers (copy it again from console.anthropic.com, no extra spaces). — رُفض مفتاح Anthropic: تحقق منه في الإعدادات ⚙ وانسخه مجدداً من console.anthropic.com.";
+const ERR_RATE = "Too many requests — wait a minute and try again. — طلبات كثيرة: انتظر دقيقة ثم أعد المحاولة.";
+const ERR_BUSY = "Claude is busy right now — try again in a moment. — كلود مشغول حالياً: أعد المحاولة بعد قليل.";
+const ERR_NET = "Network problem — check your internet connection and try again. — مشكلة شبكة: تحقق من الاتصال ثم أعد المحاولة.";
+
 async function callClaude(system, messages, settings, maxTokens = 2500) {
   const headers = { "Content-Type": "application/json" };
+  const hasKey = !!(settings && settings.anthropicKey);
   // With an API key we call the API directly from the browser (requires the
   // dangerous-direct-browser-access opt-in). Without one we rely on the
   // hosting environment (e.g. Claude artifacts) to authenticate the request.
-  if (settings && settings.anthropicKey) {
-    headers["x-api-key"] = settings.anthropicKey;
+  if (hasKey) {
+    headers["x-api-key"] = settings.anthropicKey.trim();
     headers["anthropic-version"] = "2023-06-01";
     headers["anthropic-dangerous-direct-browser-access"] = "true";
   }
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      model: (settings && settings.claudeModel) || DEFAULT_CLAUDE_MODEL,
-      max_tokens: maxTokens,
-      system,
-      messages,
-    }),
-  });
-  if (!response.ok) throw new Error("Claude API error " + response.status);
+  let response;
+  try {
+    response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        model: (settings && settings.claudeModel) || DEFAULT_CLAUDE_MODEL,
+        max_tokens: maxTokens,
+        system,
+        messages,
+      }),
+    });
+  } catch (e) {
+    // Keyless requests from outside claude.ai die at CORS preflight and land here.
+    throw new Error(hasKey ? ERR_NET : ERR_NO_KEY);
+  }
+  if (!response.ok) {
+    if (response.status === 401 || response.status === 403) throw new Error(hasKey ? ERR_BAD_KEY : ERR_NO_KEY);
+    if (response.status === 429) throw new Error(ERR_RATE);
+    if (response.status >= 500) throw new Error(ERR_BUSY);
+    throw new Error("Claude API error " + response.status);
+  }
   const data = await response.json();
   if (data.stop_reason === "refusal") throw new Error("Request declined — please rephrase.");
   return data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n");
@@ -646,6 +705,17 @@ const K_DOCS = "norco-exec-docs";
 const K_BRAIN = "norco-brain";
 const K_SETTINGS = "norco-settings";
 const K_CHATS = "norco-chats";
+
+// ------------------------------------------------------------
+// Security — app password (hashed, checked on every open)
+// ------------------------------------------------------------
+async function sha256Hex(text) {
+  const data = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+const UNLOCK_FLAG = "norco-unlocked";
 
 // ------------------------------------------------------------
 // Voice (Web Speech API — input + output, EN and AR)
@@ -848,6 +918,74 @@ function OutputCard({ text, language, onSave, saved, title, L }) {
       </div>
       <div dir={isAr ? "rtl" : "ltr"} className="p-5 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: INK, fontFamily: isAr ? AR_FONT : "inherit" }}>
         {text}
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------
+// Lock screen (create password on first run, then login on every open)
+// ------------------------------------------------------------
+function LockScreen({ settings, persistPrefs, onUnlock, L, uiLang }) {
+  const needsSetup = !settings.appPassHash;
+  const [pass, setPass] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = async () => {
+    setError("");
+    if (needsSetup) {
+      if (pass.length < 4) { setError(L.passTooShort); return; }
+      if (pass !== confirm) { setError(L.passMismatch); return; }
+      const hash = await sha256Hex(pass);
+      persistPrefs({ appPassHash: hash });
+      try { sessionStorage.setItem(UNLOCK_FLAG, "1"); } catch (e) {}
+      onUnlock();
+    } else {
+      const hash = await sha256Hex(pass);
+      if (hash === settings.appPassHash) {
+        try { sessionStorage.setItem(UNLOCK_FLAG, "1"); } catch (e) {}
+        onUnlock();
+      } else {
+        setError(L.wrongPass);
+        setPass("");
+      }
+    }
+  };
+
+  const input = (value, setValue, ph, autoFocus) => (
+    <input
+      type="password"
+      autoFocus={autoFocus}
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+      placeholder={ph}
+      dir="ltr"
+      className="w-full rounded p-3 text-sm outline-none mb-3 text-center"
+      style={{ border: "1px solid rgba(201,168,76,0.5)", background: "rgba(255,255,255,0.06)", color: "#fff" }}
+    />
+  );
+
+  return (
+    <div dir={uiLang === "ar" ? "rtl" : "ltr"} className="min-h-screen flex items-center justify-center px-4" style={{ background: NAVY_DARK, fontFamily: uiLang === "ar" ? AR_FONT : "inherit" }}>
+      <div className="w-full max-w-sm text-center">
+        <div className="text-3xl tracking-wide mb-1" style={{ fontFamily: DISPLAY_FONT, color: "#fff" }}>
+          NORCO <span style={{ color: GOLD }}>Executive Suite</span>
+        </div>
+        <p className="text-xs tracking-widest uppercase mb-8" style={{ color: "#7c86a5" }}>{L.lockWelcome}</p>
+        <div className="rounded-lg p-6" style={{ border: "1px solid rgba(201,168,76,0.35)", background: "rgba(255,255,255,0.03)" }}>
+          <div className="text-4xl mb-3">🔐</div>
+          <h1 className="text-lg mb-1" style={{ color: "#fff" }}>{needsSetup ? L.lockCreateTitle : L.lockLoginTitle}</h1>
+          {needsSetup && <p className="text-xs mb-4" style={{ color: "#aeb6cc" }}>{L.lockCreateSub}</p>}
+          <div className="mt-4">
+            {input(pass, setPass, L.passPh, true)}
+            {needsSetup && input(confirm, setConfirm, L.passConfirmPh)}
+          </div>
+          {error && <p className="text-xs mb-3" style={{ color: "#e57373" }}>{error}</p>}
+          <GoldButton onClick={submit}>{needsSetup ? L.createEnter : L.enter}</GoldButton>
+        </div>
+        {!needsSetup && <p className="text-[11px] mt-6 leading-relaxed" style={{ color: "#5f6884" }}>{L.lockNote}</p>}
       </div>
     </div>
   );
@@ -1338,6 +1476,9 @@ function CoreView({ L, uiLang }) {
 }
 
 function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpeak }) {
+  const [curPass, setCurPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [passMsg, setPassMsg] = useState("");
   const [form, setForm] = useState({
     dropboxToken: settings.dropboxToken || "",
     dropboxFolder: settings.dropboxFolder || "",
@@ -1355,6 +1496,20 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
     store.set(K_SETTINGS, next);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 2000);
+  };
+
+  const changePassword = async () => {
+    setPassMsg("");
+    const curHash = await sha256Hex(curPass);
+    if (curHash !== settings.appPassHash) { setPassMsg(L.wrongPass); return; }
+    if (newPass.length < 4) { setPassMsg(L.passTooShort); return; }
+    const next = { ...settings, appPassHash: await sha256Hex(newPass) };
+    setSettings(next);
+    store.set(K_SETTINGS, next);
+    setCurPass("");
+    setNewPass("");
+    setPassMsg(L.passChanged);
+    setTimeout(() => setPassMsg(""), 2500);
   };
 
   const field = (key, ph, type) => (
@@ -1401,6 +1556,19 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
         <p className="text-xs leading-relaxed" style={{ color: "#77725f" }}>{L.voiceHelp}</p>
       </div>
 
+      <div className="rounded-lg p-4 mb-5" style={{ background: "#fff", border: "1px solid #e2ded2" }}>
+        <div className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>🔐 {L.securitySection}</div>
+        <input type="password" dir="ltr" value={curPass} onChange={(e) => setCurPass(e.target.value)} placeholder={L.currentPassPh}
+          className="w-full rounded p-2.5 text-sm outline-none mb-2" style={{ border: "1px solid #d6d1c0", background: CANVAS, color: INK }} />
+        <input type="password" dir="ltr" value={newPass} onChange={(e) => setNewPass(e.target.value)} placeholder={L.newPassPh}
+          className="w-full rounded p-2.5 text-sm outline-none mb-2" style={{ border: "1px solid #d6d1c0", background: CANVAS, color: INK }} />
+        <div className="flex items-center gap-3 mb-2">
+          <GoldButton small onClick={changePassword}>{L.changePass}</GoldButton>
+          {passMsg && <span className="text-xs" style={{ color: passMsg === L.passChanged ? "#2e7d32" : "#a33" }}>{passMsg}</span>}
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: "#77725f" }}>{L.securityHelp}</p>
+      </div>
+
       <div className="flex items-center gap-3">
         <GoldButton onClick={saveAll}>{L.saveSettings}</GoldButton>
         {savedMsg && <span className="text-sm" style={{ color: "#2e7d32" }}>{L.settingsSaved}</span>}
@@ -1423,6 +1591,7 @@ export default function NorcoExecutiveSuite() {
   const [brain, setBrain] = useState([]);
   const [settings, setSettings] = useState({});
   const [loaded, setLoaded] = useState(false);
+  const [locked, setLocked] = useState(true);
 
   const L = STR[uiLang];
 
@@ -1438,6 +1607,10 @@ export default function NorcoExecutiveSuite() {
         if (s.autoSpeak) setAutoSpeak(true);
       }
       if (c) setChatsState(c);
+      // Stay unlocked within the same browser session; require the password again on reopen.
+      let unlockedThisSession = false;
+      try { unlockedThisSession = sessionStorage.getItem(UNLOCK_FLAG) === "1"; } catch (e) {}
+      setLocked(!(s && s.appPassHash && unlockedThisSession));
       setLoaded(true);
     })();
     // Preload voices (Chrome loads them async).
@@ -1491,6 +1664,18 @@ export default function NorcoExecutiveSuite() {
     { id: "core", label: L.core, icon: "◉" },
     { id: "settings", label: L.settings, icon: "⚙" },
   ];
+
+  if (!loaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: NAVY_DARK }}>
+        <div className="text-lg tracking-wide" style={{ fontFamily: DISPLAY_FONT, color: GOLD }}>NORCO Executive Suite</div>
+      </div>
+    );
+  }
+
+  if (locked) {
+    return <LockScreen settings={settings} persistPrefs={persistPrefs} onUnlock={() => setLocked(false)} L={L} uiLang={uiLang} />;
+  }
 
   return (
     <div dir={uiLang === "ar" ? "rtl" : "ltr"} className="flex min-h-screen flex-col sm:flex-row" style={{ background: CANVAS, fontFamily: uiLang === "ar" ? AR_FONT : "inherit" }}>
@@ -1567,6 +1752,15 @@ export default function NorcoExecutiveSuite() {
             title={L.autoSpeak}
           >
             🔊 {autoSpeak ? "ON" : "OFF"}
+          </button>
+          {/* Lock the app immediately */}
+          <button
+            onClick={() => { try { sessionStorage.removeItem(UNLOCK_FLAG); } catch (e) {} stopSpeaking(); setLocked(true); }}
+            className="px-3 py-1.5 text-xs font-semibold rounded"
+            style={{ border: "1px solid #c9c3b0", background: "#fff", color: "#77725f" }}
+            title={L.lockApp}
+          >
+            🔒 {L.lockApp}
           </button>
           <div className="ms-auto text-[11px]" style={{ color: "#9a947f" }}>
             {L.coreLocked} · 🧠 {brain.length} · {loaded ? `${docs.length} ${L.savedCount}` : L.loading}
