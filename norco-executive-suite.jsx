@@ -111,6 +111,13 @@ const STR = {
     changePass: "Change password",
     passChanged: "Password changed ✓",
     securityHelp: "The password locks the app on each device it's opened on. Note: it protects against casual access (a colleague or a lost phone), and your keys and documents are stored only on this device.",
+    test: "Test",
+    testOk: "✓ Working",
+    testFirst: "Enter the key first",
+    testBadKey: "✗ Key rejected — make sure it is an API key from the provider's console (not your login password), copied completely with no missing characters",
+    testQuota: "✗ The key is valid but has no credit/quota — add billing or credits on the provider's site",
+    testNet: "✗ Network error — check your connection and try again",
+    testFail: "✗ Failed",
   },
   ar: {
     agents: "الوكلاء", boardroom: "مجلس الإدارة", brain: "عقل الشركة", ainet: "شبكة الذكاء",
@@ -199,6 +206,13 @@ const STR = {
     changePass: "تغيير كلمة المرور",
     passChanged: "تم تغيير كلمة المرور ✓",
     securityHelp: "كلمة المرور تقفل التطبيق على كل جهاز يُفتح عليه. ملاحظة: هي حماية من الوصول العابر (زميل أو هاتف مفقود)، ومفاتيحك ومستنداتك محفوظة على هذا الجهاز فقط.",
+    test: "اختبار",
+    testOk: "✓ يعمل",
+    testFirst: "أدخل المفتاح أولاً",
+    testBadKey: "✗ رُفض المفتاح — تأكد أنه مفتاح API من لوحة تحكم المزوّد (وليس كلمة مرور الدخول) ومنسوخ كاملاً دون نقص",
+    testQuota: "✗ المفتاح صحيح لكن لا يوجد رصيد/حصة — فعّل الفوترة أو أضف رصيداً في موقع المزوّد",
+    testNet: "✗ خطأ شبكة — تحقق من الاتصال وأعد المحاولة",
+    testFail: "✗ فشل",
   },
 };
 
@@ -589,7 +603,7 @@ async function callClaude(system, messages, settings, maxTokens = 2500) {
 async function callOpenAI(question, settings) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + settings.openaiKey },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + settings.openaiKey.trim() },
     body: JSON.stringify({
       model: settings.openaiModel || "gpt-4o",
       max_tokens: 1200,
@@ -604,7 +618,7 @@ async function callOpenAI(question, settings) {
 async function callGemini(question, settings) {
   const model = settings.geminiModel || "gemini-2.0-flash";
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(settings.geminiKey.trim())}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -614,6 +628,42 @@ async function callGemini(question, settings) {
   if (!response.ok) throw new Error("Gemini API error " + response.status);
   const data = await response.json();
   return data.candidates[0].content.parts.map((p) => p.text).join("\n");
+}
+
+// Free "does this key work?" probes — no tokens are consumed.
+async function testProviderKey(provider, key) {
+  const k = (key || "").trim();
+  if (!k) return { ok: false, code: "empty" };
+  try {
+    let r;
+    if (provider === "claude") {
+      r = await fetch("https://api.anthropic.com/v1/messages/count_tokens", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": k,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({ model: DEFAULT_CLAUDE_MODEL, messages: [{ role: "user", content: "ping" }] }),
+      });
+    } else if (provider === "openai") {
+      r = await fetch("https://api.openai.com/v1/models", { headers: { Authorization: "Bearer " + k } });
+    } else if (provider === "gemini") {
+      r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(k));
+    } else if (provider === "eleven") {
+      r = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": k } });
+    } else {
+      return { ok: false, code: "unknown" };
+    }
+    if (r.ok) return { ok: true };
+    if (r.status === 401 || r.status === 403) return { ok: false, code: "badkey" };
+    if (provider === "gemini" && r.status === 400) return { ok: false, code: "badkey" };
+    if (r.status === 429) return { ok: false, code: "quota" };
+    return { ok: false, code: "http" + r.status };
+  } catch (e) {
+    return { ok: false, code: "network" };
+  }
 }
 
 // ------------------------------------------------------------
@@ -1490,13 +1540,42 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
   });
   const [savedMsg, setSavedMsg] = useState(false);
 
+  const [testRes, setTestRes] = useState({});
+
   const saveAll = () => {
-    const next = { ...settings, ...form };
+    // Trim stray spaces/newlines that come along when keys are pasted on mobile.
+    const cleaned = {};
+    for (const [k, v] of Object.entries(form)) cleaned[k] = typeof v === "string" ? v.trim() : v;
+    const next = { ...settings, ...cleaned };
     setSettings(next);
     store.set(K_SETTINGS, next);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 2000);
   };
+
+  const runTest = async (provider, key) => {
+    setTestRes((t) => ({ ...t, [provider]: "…" }));
+    const res = await testProviderKey(provider, key);
+    const msg = res.ok
+      ? L.testOk
+      : res.code === "empty" ? L.testFirst
+      : res.code === "badkey" ? L.testBadKey
+      : res.code === "quota" ? L.testQuota
+      : res.code === "network" ? L.testNet
+      : L.testFail + " (" + res.code + ")";
+    setTestRes((t) => ({ ...t, [provider]: msg }));
+  };
+
+  const testRow = (provider, key) => (
+    <div className="flex items-center gap-3 mb-3 flex-wrap">
+      <GoldButton small onClick={() => runTest(provider, key)}>{L.test}</GoldButton>
+      {testRes[provider] && (
+        <span className="text-xs" style={{ color: testRes[provider] === L.testOk ? "#2e7d32" : testRes[provider] === "…" ? "#77725f" : "#a33" }}>
+          {testRes[provider]}
+        </span>
+      )}
+    </div>
+  );
 
   const changePassword = async () => {
     setPassMsg("");
@@ -1539,14 +1618,18 @@ function SettingsView({ settings, setSettings, L, uiLang, autoSpeak, setAutoSpea
       <div className="rounded-lg p-4 mb-5" style={{ background: "#fff", border: "1px solid #e2ded2" }}>
         <div className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>{L.aiSection}</div>
         {field("anthropicKey", L.anthropicKeyPh)}
+        {testRow("claude", form.anthropicKey)}
         {field("openaiKey", L.openaiKeyPh)}
+        {testRow("openai", form.openaiKey)}
         {field("geminiKey", L.geminiKeyPh)}
+        {testRow("gemini", form.geminiKey)}
         <p className="text-xs leading-relaxed" style={{ color: "#77725f" }}>{L.aiHelp}</p>
       </div>
 
       <div className="rounded-lg p-4 mb-5" style={{ background: "#fff", border: "1px solid #e2ded2" }}>
         <div className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: GOLD }}>{L.voiceSection}</div>
         {field("elevenKey", L.elevenKeyPh)}
+        {testRow("eleven", form.elevenKey)}
         {field("elevenVoiceId", L.elevenVoiceIdPh, "text")}
         <p className="text-xs leading-relaxed mb-3" style={{ color: "#77725f" }}>{L.elevenHelp}</p>
         <label className="flex items-center gap-2 text-sm mb-2" style={{ color: INK }}>
