@@ -12,8 +12,8 @@ def data_uri(name):
 
 CH = {n: data_uri(n) for n in [
     "revenue_by_division.png", "revenue_by_market.png", "profit_trend.png",
-    "net_margin.png", "cumulative_profit.png", "use_of_funds.png",
-    "containers.png", "returns.png"]}
+    "cumulative_profit.png", "use_of_funds.png", "containers.png",
+    "returns.png", "y1_cash.png", "battery_prices.png"]}
 
 STYLE = """
 <style>
@@ -150,62 +150,65 @@ BODY = f"""
 
   <header class="hero">
     <div class="wrap">
-      <div class="brand">NORCO<small>GENERAL TRADING L.L.C.</small></div>
+      <div class="brand">NORCO<small>EGYPT &nbsp;&middot;&nbsp; GENERAL TRADING</small></div>
       <div class="tag" style="margin-top:22px">
         <span>Exclusive Vestwoods (Haier Energy) agency</span>
-        <span>Al Reem Plastics · 147 SKUs</span>
-        <span>Egypt · Sudan · Libya · Algeria</span>
+        <span>Al Reem Plastics &middot; group plant in Angola</span>
+        <span>Egypt &middot; Sudan &middot; Algeria &middot; Libya</span>
       </div>
       <h1>Two divisions.<br>One distribution platform.</h1>
-      <p class="lede">A de-risked import-and-distribute business pairing high-value lithium
-      energy-storage systems with fast-turning premium houseware — targeting
-      <b style="color:#fff">${M.REV_5YR/1000:.0f}M revenue</b> and
-      <b style="color:#fff">${M.NP_5YR/1000:.1f}M net profit</b> over five years.</p>
+      <p class="lede">Invest in NORCO Egypt: high-value lithium energy storage paired with
+      fast-turning houseware from the group's own Angola plant &mdash; targeting
+      <b style="color:#fff">${M.REV_5YR/1e6:.1f}M revenue</b> and
+      <b style="color:#fff">${M.NP_5YR/1e6:.1f}M net profit</b> over five years,
+      with every dollar of profit distributed.</p>
       <div class="askbox">
         <div>
           <div class="lbl">Investment sought</div>
-          <div class="big num">$2.0M</div>
-          <div class="sub">core raise · band $1.0M – $2.5M</div>
+          <div class="big num">$1.5M</div>
+          <div class="sub">for 50% of NORCO Egypt &middot; band $1.0M &ndash; $1.5M</div>
         </div>
         <div class="divider"></div>
         <div>
-          <div class="lbl">Investor IRR</div>
-          <div class="big num">60%<span style="font-size:20px;color:var(--hero-mute)"> / 28%</span></div>
-          <div class="sub">Option A equity / Option B profit-share</div>
+          <div class="lbl">Investor return</div>
+          <div class="big num">{M.INV_IRR*100:.0f}%<span style="font-size:20px;color:var(--hero-mute)"> IRR &middot; {M.INV_MOIC:.1f}x</span></div>
+          <div class="sub">dividends + terminal value at 5&times; Y5 profit</div>
         </div>
         <div class="divider"></div>
         <div>
           <div class="lbl">Break-even</div>
-          <div class="big num">Month 3</div>
-          <div class="sub">operating profitability</div>
+          <div class="big num">Month 4</div>
+          <div class="sub">operating &middot; cumulative Month 8</div>
         </div>
       </div>
     </div>
   </header>
 
   <div class="kpis">
-    <div class="kpi"><div class="v num">${M.REV_5YR/1000:.0f}M</div><div class="l">5-yr group revenue</div></div>
-    <div class="kpi"><div class="v num">${M.GP_5YR/1000:.0f}M</div><div class="l">5-yr gross profit</div></div>
-    <div class="kpi"><div class="v num">${M.NP_5YR/1000:.1f}M</div><div class="l">5-yr net profit</div></div>
-    <div class="kpi"><div class="v num">$14.5K</div><div class="l">founder pre-invested</div></div>
+    <div class="kpi"><div class="v num">${M.REV_5YR/1e6:.1f}M</div><div class="l">5-yr revenue</div></div>
+    <div class="kpi"><div class="v num">${M.NP_5YR/1e6:.1f}M</div><div class="l">5-yr net profit</div></div>
+    <div class="kpi"><div class="v num">76</div><div class="l">containers / yr by Y5</div></div>
+    <div class="kpi"><div class="v num">100%</div><div class="l">profit distributed yearly</div></div>
   </div>
 
   <section class="band">
     <div class="wrap">
       <div class="eyebrow">The opportunity</div>
       <h2 class="sec">Why the two divisions fit together</h2>
-      <p class="sec-lead">Vestwoods brings the margin dollars; Al Reem brings the cash velocity.
-      Run on one licence, one warehouse and one management team, they hedge each other's risk.</p>
+      <p class="sec-lead">Vestwoods brings the ticket size; Al Reem brings the cash velocity and a
+      margin locked in by the group's own plant. One licence, one warehouse, one team.</p>
       <div class="why">
         <div class="item"><div class="h"><b>Complementary</b> cash cycles</div>
-          <p>Vestwoods prepays every container in Year 1 — heavy but high-value. Al Reem's low-ticket
-          houseware turns fast and throws off cash that cushions the battery ramp.</p></div>
-        <div class="item"><div class="h"><b>Cycle-resistant</b> demand</div>
-          <p>Energy storage is a purchase of necessity against load-shedding; houseware is everyday,
-          uncorrelated replacement demand. Neither depends on the other's market.</p></div>
-        <div class="item"><div class="h"><b>Platform</b> leverage</div>
-          <p>A shared showroom, warehouse, dealer network and team means Al Reem's gross margin drops
-          almost straight to contribution — a second engine at low incremental cost.</p></div>
+          <p>Vestwoods containers are prepaid in Year 1 &mdash; heavy but high-value. Al Reem's
+          20,000-unit houseware containers turn in weeks and throw off cash that cushions the
+          battery ramp.</p></div>
+        <div class="item"><div class="h"><b>Locked-in</b> houseware margin</div>
+          <p>Al Reem Plastics is the group's own producer in Angola. NORCO buys 30% below price
+          list &mdash; a guaranteed 30% retail / 20% wholesale margin no third-party supplier can
+          squeeze.</p></div>
+        <div class="item"><div class="h"><b>Priced to win</b> in batteries</div>
+          <p>Vestwoods retails 15&ndash;26% below tier-1 brands per kWh with Haier pedigree, a
+          5-year warranty and a Cairo service bench the grey market cannot match.</p></div>
       </div>
     </div>
   </section>
@@ -216,33 +219,35 @@ BODY = f"""
       <h2 class="sec">What NORCO sells</h2>
       <div class="divisions">
         <div class="dcard vw">
-          <div class="tag">Division 1 · Energy storage</div>
-          <h3>Vestwoods — Haier Energy BESS</h3>
-          <p>Exclusive Egypt agency for Vestwoods lithium (LFP) battery storage, hybrid inverters and
-          telecom power. Priced 15–25% below premium brands with Haier-backed quality and a 5-year warranty.</p>
+          <div class="tag">Division 1 &middot; Energy storage</div>
+          <h3>Vestwoods &mdash; Haier Energy BESS</h3>
+          <p>Exclusive Egypt agency for lithium (LFP) storage, hybrid inverters and telecom power.
+          Egypt sells 50/50 retail-wholesale; Sudan, Algeria and Libya buy at wholesale on
+          cash-before-shipment terms.</p>
           <ul>
-            <li>Residential, C&amp;I and telecom segments</li>
-            <li>340 units per 40ft container · landed $239,805</li>
-            <li>Committed Sudan buyer; Algeria agency in negotiation</li>
+            <li>340 units / 40ft &middot; landed cost $342,316</li>
+            <li>Container sells $472,680 retail / $393,882 wholesale</li>
+            <li>Committed Sudan buyer; Algeria on 100% LC from Month 8</li>
           </ul>
           <div class="metric">
-            <div><div class="n num">{money(M.VW_REV[4])}</div><div class="c">Year-5 revenue</div></div>
-            <div><div class="n num">76</div><div class="c">containers by Y5</div></div>
+            <div><div class="n num">${M.VW_REV[4]/1e6:.1f}M</div><div class="c">Year-5 revenue</div></div>
+            <div><div class="n num">13 &rarr; 41</div><div class="c">containers Y1 &rarr; Y5</div></div>
           </div>
         </div>
         <div class="dcard ar">
-          <div class="tag">Division 2 · Houseware</div>
-          <h3>Al Reem Plastics — Türkiye</h3>
-          <p>A fully SKU-costed range of 147 premium household plastics — storage, kitchen, food,
-          laundry, tableware and planters — imported in mixed containers and sold wholesale &amp; retail.</p>
+          <div class="tag">Division 2 &middot; Houseware</div>
+          <h3>Al Reem Plastics &mdash; Angola</h3>
+          <p>69 SKUs and 20,488 units per container of storage, kitchen, laundry and tableware,
+          costed line-by-line from the July-2026 packing list. Sold in Egypt (retail + wholesale)
+          and Sudan (wholesale).</p>
           <ul>
-            <li>Verified economics: wholesale +15%, retail +38%</li>
-            <li>Blended gross margin 19% → 23%</li>
-            <li>Shares NORCO's warehouse, showrooms &amp; dealers</li>
+            <li>Landed cost $59,343 per container, 30% below list</li>
+            <li>Margin locked: 30% retail / 20% wholesale</li>
+            <li>Local-brand prices with imported-brand finish</li>
           </ul>
           <div class="metric">
-            <div><div class="n num">{money(M.AR_REV[4])}</div><div class="c">Year-5 revenue</div></div>
-            <div><div class="n num">147</div><div class="c">costed SKUs</div></div>
+            <div><div class="n num">${M.AR_REV[4]/1e6:.1f}M</div><div class="c">Year-5 revenue</div></div>
+            <div><div class="n num">15 &rarr; 35</div><div class="c">containers Y1 &rarr; Y5</div></div>
           </div>
         </div>
       </div>
@@ -251,62 +256,70 @@ BODY = f"""
 
   <section class="band">
     <div class="wrap">
-      <div class="eyebrow">The numbers</div>
-      <h2 class="sec">Financial trajectory</h2>
-      <p class="sec-lead">Consolidated group figures. Vestwoods follows the founder's vetted Business
-      Plan V4; Al Reem is modelled on its verified April-2026 catalogue economics.</p>
+      <div class="eyebrow">Market study</div>
+      <h2 class="sec">Priced to win on both shelves</h2>
+      <p class="sec-lead">NORCO's June-2026 Cairo market survey: Vestwoods undercuts every warrantied
+      competitor per kWh, and Al Reem lands at local-brand price points with full margin intact.</p>
       <div class="figrid">
-        <figure class="chart full"><img alt="Group revenue by division" src="{CH['revenue_by_division.png']}">
-          <figcaption>Group revenue scales from ${M.REV[0]/1000:.1f}M to ${M.REV[4]/1000:.1f}M, with Al Reem lifting the mix.</figcaption></figure>
-        <figure class="chart"><img alt="Gross and net profit" src="{CH['profit_trend.png']}">
-          <figcaption>Gross and net profit, five-year build.</figcaption></figure>
-        <figure class="chart"><img alt="Net profit margin" src="{CH['net_margin.png']}">
-          <figcaption>Net margin widens as fixed costs are absorbed.</figcaption></figure>
-        <figure class="chart"><img alt="Vestwoods revenue by market" src="{CH['revenue_by_market.png']}">
-          <figcaption>Four Vestwoods export corridors compounding.</figcaption></figure>
-        <figure class="chart"><img alt="Containers per year" src="{CH['containers.png']}">
-          <figcaption>Vestwoods container throughput, four markets.</figcaption></figure>
+        <figure class="chart full"><img alt="Battery price per kWh comparison" src="{CH['battery_prices.png']}">
+          <figcaption>Vestwoods at $266/kWh vs. $303&ndash;$460 for warrantied competitors; only the
+          no-warranty grey market is cheaper. Houseware: Al Reem's 90L waste bin retails EGP 869 vs.
+          EGP 800&ndash;1,000 local and EGP 1,100&ndash;1,400 imported.</figcaption></figure>
       </div>
     </div>
   </section>
 
   <section class="band alt">
     <div class="wrap">
-      <div class="eyebrow">The return</div>
-      <h2 class="sec">What the investor earns</h2>
-      <p class="sec-lead">Two structures on a $2.0M core raise. Both are protected by milestone-gated
-      tranches, USD books, cash-before-shipment export terms and the assignable exclusive agency.</p>
+      <div class="eyebrow">The numbers</div>
+      <h2 class="sec">Financial trajectory</h2>
+      <p class="sec-lead">Margins are set by verified unit economics: Vestwoods COGS is 72% of retail
+      and 87% of wholesale revenue; Al Reem margins are contractual. Year 1 is modelled monthly.</p>
       <div class="figrid">
-        <div>
-          <table class="ret num">
-            <thead><tr><th>Structure</th><th style="text-align:right">IRR</th><th style="text-align:right">MOIC</th></tr></thead>
-            <tbody>
-              <tr><td class="opt">Option A — 50% equity<br><span style="font-weight:400;color:var(--muted);font-size:13px">dividends + retained stake</span></td>
-                  <td class="n em">{M.OPT_A_IRR*100:.0f}%</td><td class="n em">{M.OPT_A_MOIC:.1f}x</td></tr>
-              <tr><td class="opt">Option B — 25% profit share<br><span style="font-weight:400;color:var(--muted);font-size:13px">+ capital redemption at Year 5</span></td>
-                  <td class="n em">{M.OPT_B_IRR*100:.0f}%</td><td class="n em">{M.OPT_B_MOIC:.1f}x</td></tr>
-            </tbody>
-          </table>
-          <figure class="chart" style="margin-top:22px"><img alt="Cumulative net profit vs capital" src="{CH['cumulative_profit.png']}">
-            <figcaption>Cumulative net profit clears the $2.0M raise inside Year 2.</figcaption></figure>
-        </div>
-        <figure class="chart"><img alt="Use of funds" src="{CH['use_of_funds.png']}">
-          <figcaption>Capital funds Vestwoods prepayments, Al Reem opening inventory, setup and runway —
-          released in three milestone-gated tranches.</figcaption></figure>
+        <figure class="chart full"><img alt="Group revenue by division" src="{CH['revenue_by_division.png']}">
+          <figcaption>Group revenue scales from ${M.REV[0]/1e6:.1f}M to ${M.REV[4]/1e6:.1f}M.</figcaption></figure>
+        <figure class="chart"><img alt="Gross and net profit" src="{CH['profit_trend.png']}">
+          <figcaption>Profitable from Year 1; net profit reaches ${M.NP[4]/1e3:,.0f}K by Year 5.</figcaption></figure>
+        <figure class="chart"><img alt="Vestwoods revenue by market" src="{CH['revenue_by_market.png']}">
+          <figcaption>Four Vestwoods markets compounding.</figcaption></figure>
+        <figure class="chart"><img alt="Containers per year" src="{CH['containers.png']}">
+          <figcaption>Container throughput, both divisions.</figcaption></figure>
+        <figure class="chart"><img alt="Year 1 monthly cash position" src="{CH['y1_cash.png']}">
+          <figcaption>Year-1 cash never goes below ${M.MIN_CASH_WITH_RAISE/1e3:,.0f}K with the raise;
+          ends at ${M.Y1_END_CASH/1e6:.2f}M.</figcaption></figure>
       </div>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap">
+      <div class="eyebrow">The return</div>
+      <h2 class="sec">What the investor earns</h2>
+      <p class="sec-lead">$1.5M buys 50% of NORCO Egypt. 100% of net profit is distributed annually in
+      arrears; NORCO UAE (20% shareholder) anchors the agency and the Angola supply line.</p>
+      <div class="figrid">
+        <figure class="chart"><img alt="Investor cash flow" src="{CH['returns.png']}">
+          <figcaption>Dividends build to ${M.INV_DIV[4]/1e3:,.0f}K/yr; terminal value of
+          ${M.INV_TERMINAL/1e6:.1f}M at a conservative 5&times; Year-5 profit.</figcaption></figure>
+        <figure class="chart"><img alt="Cumulative net profit vs capital" src="{CH['cumulative_profit.png']}">
+          <figcaption>Cumulative net profit passes the full $1.5M investment during Year 3.</figcaption></figure>
+        <figure class="chart full"><img alt="Use of funds" src="{CH['use_of_funds.png']}">
+          <figcaption>Two milestone-gated tranches: $1.0M at close, $0.5M at Month 4 against
+          verified sell-through and Sudan advances. Peak funding need: ${abs(M.PEAK_DEFICIT)/1e6:.2f}M.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt">
+    <div class="wrap">
       <div class="eyebrow">The plan</div>
       <h2 class="sec">Execution roadmap</h2>
       <div class="timeline">
-        <div class="phase"><div class="p">M1–M3</div><div class="t">Launch</div><p>Tranche 1 drawn; first Vestwoods containers prepaid; showroom #2 opens; Sudan first order; first Al Reem container.</p></div>
-        <div class="phase"><div class="p">M4–M6</div><div class="t">Prove</div><p>Tranche 2 gated release; operating break-even confirmed; dealers signed; houseware retail sell-through.</p></div>
-        <div class="phase"><div class="p">M7–M12</div><div class="t">Convert</div><p>Tranche 3 for houseware inventory; Algeria agency signed, first LC order ships; Libya due diligence.</p></div>
-        <div class="phase"><div class="p">M13–M18</div><div class="t">Compound</div><p>Vestwoods credit terms activate; Libya launches; four-market, two-division operation on self-generated cash.</p></div>
-        <div class="phase"><div class="p">Y3–Y5</div><div class="t">Scale</div><p>76 Vestwoods containers/yr; Al Reem scaled across retail &amp; export; closing cash ~$9.3M.</p></div>
+        <div class="phase"><div class="p">M1&ndash;M3</div><div class="t">Launch</div><p>T1 drawn; first Vestwoods POs prepaid; New Cairo showroom opens; first Al Reem containers land; Sudan first order.</p></div>
+        <div class="phase"><div class="p">M4&ndash;M6</div><div class="t">Prove</div><p>Operating break-even (M4); T2 drawn on milestones; dealers signed; houseware sell-through in both showrooms.</p></div>
+        <div class="phase"><div class="p">M7&ndash;M12</div><div class="t">Convert</div><p>Algeria first LC orders ship (M8); cumulative break-even (M8); hypermarket listings; Libya due diligence.</p></div>
+        <div class="phase"><div class="p">M13&ndash;M18</div><div class="t">Compound</div><p>Vestwoods credit terms activate; Libya launches; full dividend distributions begin.</p></div>
+        <div class="phase"><div class="p">Y3&ndash;Y5</div><div class="t">Scale</div><p>41 Vestwoods + 35 Al Reem containers/yr; Alexandria branch; closing cash ${M.CF_CLOSE[4]/1e6:.1f}M.</p></div>
       </div>
     </div>
   </section>
@@ -314,14 +327,15 @@ BODY = f"""
   <section class="cta">
     <div class="wrap">
       <div class="eyebrow" style="color:var(--gold2)">The ask</div>
-      <h2 class="serif">$2.0M to fund a two-division platform<br>already built and operational</h2>
-      <p>An exclusive energy-storage agency, a fully-costed houseware range, live export corridors,
-      and a founder already invested — targeting a 60% investor IRR over five years.</p>
-      <p class="contact">Fadi Jannan · Managing Director &nbsp;·&nbsp; f.jannan@norcotrading.com &nbsp;·&nbsp; +971 58 509 3383</p>
+      <h2 class="serif">$1.5M for half of a platform<br>that is already built</h2>
+      <p>An exclusive energy-storage agency priced under every warrantied competitor, a group-owned
+      houseware supply line with locked margins, four markets in motion, and a founder already
+      invested and operational.</p>
+      <p class="contact">Fadi Jannan &middot; Managing Director &nbsp;&middot;&nbsp; f.jannan@norcotrading.com &nbsp;&middot;&nbsp; +971 58 509 3383</p>
     </div>
   </section>
 
-  <div class="foot">NORCO General Trading L.L.C. · Business Plan &amp; Investment Proposal · Version 5.0 (Group) · Strictly Private &amp; Confidential</div>
+  <div class="foot">NORCO Egypt &middot; Business Plan &amp; Investment Proposal &middot; Version 5.0 (Group) &middot; Strictly Private &amp; Confidential</div>
 </div>
 """
 

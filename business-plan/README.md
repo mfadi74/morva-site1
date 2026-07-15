@@ -1,51 +1,51 @@
-# NORCO General Trading L.L.C. — Group Business Plan & Investor Package
+# NORCO Egypt — Group Business Plan & Investor Package (V5)
 
-A complete investor package for **NORCO**, covering **both** product divisions on one
-distribution platform:
+Investor package for **NORCO Egypt**, a two-division distribution company:
 
-- **Vestwoods (Haier Energy)** — exclusive Egypt agency for lithium battery energy-storage
-  systems (Egypt · Sudan · Libya · Algeria).
-- **Al Reem Plastics** — a 147-SKU premium houseware range sourced from Türkiye.
+- **Vestwoods (Haier Energy)** — exclusive lithium battery energy-storage agency
+  (Egypt · Sudan · Algeria · Libya).
+- **Al Reem Plastics** — premium houseware produced at the group's affiliated plant in
+  **Angola**, supplied to NORCO at 30% below price list (Egypt · Sudan).
 
-Built from the source documents provided (Vestwoods Business Plan V4, the Vestwoods investor
-model, and the Al Reem Plastics costed catalogue), consolidated into one group plan and set of
-financials for an investor considering a **USD 2.0M** raise.
+The investor invests **USD 1.5M for 50% of NORCO Egypt** (funding band USD 1.0M–1.5M);
+NORCO General Trading L.L.C. (UAE) holds 20% and anchors the supplier relationships.
 
 ## Deliverables
 
 | File | What it is |
 |------|------------|
-| **NORCO_Group_Business_Plan.docx** | The full written business plan — 10 sections, 18 tables, 8 embedded charts. The primary document to submit to the investor. |
-| **NORCO_Group_Investor_Model.xlsx** | The formula-driven financial model — assumptions, consolidated 5-year P&L, revenue detail, Al Reem catalogue economics, cash flow, funding & returns (live IRR/MOIC), shareholding, dashboard. Change the blue input cells to flex the plan. |
-| **NORCO_Investor_Brief.html** | A one-page, graphics-rich investor brief (opens in any browser; light & dark themes; print-friendly). The "convince the investor" visual summary. |
-| **assets/** | The eight source charts as standalone PNGs. |
+| **NORCO_Group_Business_Plan.docx** | The written plan — 10 sections incl. a competitive pricing study (batteries $/kWh vs. Pylontech/Huawei/Deye/Growatt; houseware vs. Egyptian local & imported brands), 21 tables, 9 charts. |
+| **NORCO_Group_Investor_Model.xlsx** | 13-sheet financial model mirroring the founder's V4 structure: Key Assumptions, Pre-Op Investment, Pricing Reference, Staff Plan, Monthly P&L Year 1, Annual P&L Y1–Y5, Cash Flow Year 1 (monthly), 5Y Cash Flow, Market Detail, Funding & Returns, Shareholding, Dashboard. |
+| **NORCO_Investor_Brief.html** | Graphics-rich one-page investor brief (any browser; light/dark; print-friendly). |
+| **assets/** | The nine charts as standalone PNGs. |
 
-## Headline numbers (consolidated group, 5-year)
+## Headline numbers (5-year, NORCO Egypt)
 
-- Revenue **USD 101.4M** · gross profit **USD 28.2M** · net profit **USD 13.8M**
-- Operating break-even in **Month 3**
-- Investor returns: **Option A** (50% equity) ~**60% IRR / 8.8x MOIC**; **Option B**
-  (25% profit share + capital redemption) ~**28% IRR / 2.7x MOIC**
-- Ask: **USD 2.0M** core raise in three milestone-gated tranches (band USD 1.0M – 2.5M)
+- Revenue **USD 63.6M** · gross profit **USD 10.9M** · net profit **USD 3.3M**
+- Operating break-even **Month 4** (Nov-26); cumulative break-even **Month 8** (Mar-27)
+- Peak self-funded cash need **USD 1.29M** — covered by the USD 1.5M raise with buffer
+- Investor return (50% equity, 100% dividend payout + terminal at 5× Y5 profit):
+  **~21% IRR · 2.4x MOIC**
 
-## Notes on the figures
+## Key economics (verified)
 
-- **Vestwoods** figures follow the founder's vetted *Business Plan V4* (internally consistent
-  across the source document).
-- **Al Reem Plastics** figures are planning projections built on the **verified April-2026
-  catalogue unit economics** (landed COGS, wholesale = COGS × 1.15, retail = COGS × 1.38,
-  blended gross margin 19% → 23%).
-- Planning FX: USD 1 = EGP 53. Corporate tax 22.5% on net profit.
+- **Vestwoods container** (340 units): landed COGS $342,316 → sells $472,680 retail
+  (COGS 72% of revenue) / $393,882 wholesale (COGS 87%). Egypt 50/50 mix; exports wholesale.
+- **Al Reem container** (20,488 units / 69 SKUs, priced line-by-line from the July-2026
+  packing list): landed cost $59,343 → margin 30% of retail revenue / 20% of wholesale.
+- Container plan — Vestwoods: Egypt 6/7/9/11/15, Sudan 4/5/6/8/10, Algeria 3/4/6/7/8,
+  Libya 0/4/5/6/8. Al Reem: Egypt 10/12/15/18/20, Sudan 5/8/10/12/15.
+- FX EGP 53 = USD 1 · corporate tax 22.5% (Y1 loss carry-forward).
 
 ## Rebuilding
 
-The `build/` folder regenerates every artifact from a single source of truth (`model.py`):
-
 ```bash
-pip install openpyxl python-docx matplotlib
+pip install openpyxl python-docx matplotlib numpy
 cd build
 python3 charts.py        # -> assets/*.png
 python3 build_docx.py    # -> NORCO_Group_Business_Plan.docx
 python3 build_xlsx.py    # -> NORCO_Group_Investor_Model.xlsx
-python3 build_html.py     # -> NORCO_Investor_Brief.html
+python3 build_html.py    # -> NORCO_Investor_Brief.html
 ```
+
+`build/model.py` is the single source of truth for every number in all three documents.

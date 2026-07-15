@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Build the NORCO Group Business Plan & Investment Proposal (.docx)."""
+"""Build the NORCO Group Business Plan & Investment Proposal V5 (.docx)."""
 import os
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor, Emu
-from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
+from docx.shared import Pt, Inches, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 import model as M
@@ -13,20 +12,13 @@ import model as M
 ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
 OUT = os.path.join(os.path.dirname(__file__), "..", "NORCO_Group_Business_Plan.docx")
 
-NAVY = RGBColor(0x0F, 0x29, 0x42)
-TEAL = RGBColor(0x0F, 0x6E, 0x6A)
-GOLD = RGBColor(0xC8, 0x89, 0x2A)
-INK = RGBColor(0x1A, 0x1A, 0x19)
-MUTED = RGBColor(0x5C, 0x5B, 0x57)
-WHITE = RGBColor(0xFF, 0xFF, 0xFF)
-LIGHT = RGBColor(0xF3, 0xF5, 0xF7)
+NAVY = RGBColor(0x0F, 0x29, 0x42); TEAL = RGBColor(0x0F, 0x6E, 0x6A)
+GOLD = RGBColor(0xC8, 0x89, 0x2A); INK = RGBColor(0x1A, 0x1A, 0x19)
+MUTED = RGBColor(0x5C, 0x5B, 0x57); WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 
 doc = Document()
-
-# ---- base styles ----
 normal = doc.styles["Normal"]
-normal.font.name = "Calibri"
-normal.font.size = Pt(10.5)
+normal.font.name = "Calibri"; normal.font.size = Pt(10.5)
 normal.font.color.rgb = INK
 normal.paragraph_format.space_after = Pt(6)
 normal.paragraph_format.line_spacing = 1.12
@@ -37,7 +29,7 @@ def shade(cell, hex_color):
     sh.set(qn("w:val"), "clear"); sh.set(qn("w:color"), "auto"); sh.set(qn("w:fill"), hex_color)
     tcPr.append(sh)
 
-def set_cell_margins(cell, top=60, bottom=60, left=110, right=110):
+def cell_margins(cell, top=60, bottom=60, left=110, right=110):
     tcPr = cell._tc.get_or_add_tcPr()
     m = OxmlElement("w:tcMar")
     for name, val in (("top", top), ("bottom", bottom), ("start", left), ("end", right)):
@@ -45,27 +37,24 @@ def set_cell_margins(cell, top=60, bottom=60, left=110, right=110):
     tcPr.append(m)
 
 def no_borders(table):
-    tbl = table._tbl
-    tblPr = tbl.tblPr
     borders = OxmlElement("w:tblBorders")
     for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
         e = OxmlElement(f"w:{edge}"); e.set(qn("w:val"), "none"); borders.append(e)
-    tblPr.append(borders)
+    table._tbl.tblPr.append(borders)
 
-def hairline_borders(table, color="D8DCE0"):
-    tbl = table._tbl
+def hairline(table, color="D8DCE0"):
     borders = OxmlElement("w:tblBorders")
     for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
         e = OxmlElement(f"w:{edge}")
         e.set(qn("w:val"), "single"); e.set(qn("w:sz"), "4")
         e.set(qn("w:space"), "0"); e.set(qn("w:color"), color)
         borders.append(e)
-    tbl.tblPr.append(borders)
+    table._tbl.tblPr.append(borders)
 
-def run(p, text, size=10.5, bold=False, color=INK, italic=False, font="Calibri"):
+def run(p, text, size=10.5, bold=False, color=INK, italic=False):
     r = p.add_run(text)
     r.font.size = Pt(size); r.font.bold = bold; r.font.italic = italic
-    r.font.color.rgb = color; r.font.name = font
+    r.font.color.rgb = color; r.font.name = "Calibri"
     return r
 
 def para(text="", size=10.5, bold=False, color=INK, align=None, space_after=6,
@@ -81,11 +70,8 @@ def h1(num, text):
     p = doc.add_paragraph()
     p.paragraph_format.space_before = Pt(16); p.paragraph_format.space_after = Pt(8)
     p.paragraph_format.keep_with_next = True
-    run(p, f"{num}   ", 15, True, GOLD)
-    run(p, text, 15, True, NAVY)
-    # underline rule
-    pPr = p._p.get_or_add_pPr()
-    pbdr = OxmlElement("w:pBdr")
+    run(p, f"{num}   ", 15, True, GOLD); run(p, text, 15, True, NAVY)
+    pPr = p._p.get_or_add_pPr(); pbdr = OxmlElement("w:pBdr")
     bottom = OxmlElement("w:bottom")
     bottom.set(qn("w:val"), "single"); bottom.set(qn("w:sz"), "6")
     bottom.set(qn("w:space"), "4"); bottom.set(qn("w:color"), "0F2942")
@@ -100,236 +86,193 @@ def h2(text):
     return p
 
 def bullet(text_runs, space_after=4):
-    """text_runs: list of (text, bold) or a plain string."""
-    p = doc.add_paragraph(style=None)
+    p = doc.add_paragraph()
     p.paragraph_format.left_indent = Inches(0.28)
     p.paragraph_format.space_after = Pt(space_after)
     p.paragraph_format.line_spacing = 1.1
     run(p, "▪  ", 10.5, True, GOLD)
-    if isinstance(text_runs, str):
-        text_runs = [(text_runs, False)]
-    for t, b in text_runs:
-        run(p, t, 10.5, b, INK)
+    if isinstance(text_runs, str): text_runs = [(text_runs, False)]
+    for t, b in text_runs: run(p, t, 10.5, b, INK)
     return p
 
-def add_chart(name, width=6.5, caption=None):
+def add_chart(name, width=6.4, caption=None):
     doc.add_picture(os.path.join(ASSETS, name), width=Inches(width))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
     if caption:
-        c = para(caption, 8.5, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, space_after=10, italic=True)
+        para(caption, 8.5, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, space_after=10, italic=True)
 
-def table(headers, rows, widths=None, header_fill="0F2942", zebra=True,
-          total_row=False, align_right_from=1, font_size=9.5):
+def table(headers, rows, widths=None, zebra=True, total_row=False, align_right_from=1, font_size=9.5):
     t = doc.add_table(rows=1, cols=len(headers))
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    hairline_borders(t)
-    # header
+    hairline(t)
     for j, htext in enumerate(headers):
-        c = t.rows[0].cells[j]
-        shade(c, header_fill); set_cell_margins(c)
+        c = t.rows[0].cells[j]; shade(c, "0F2942"); cell_margins(c)
         p = c.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
         if j >= align_right_from: p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
         run(p, str(htext), font_size, True, WHITE)
-    # body
     for i, rowvals in enumerate(rows):
         cells = t.add_row().cells
         is_total = total_row and i == len(rows)-1
         for j, val in enumerate(rowvals):
-            c = cells[j]; set_cell_margins(c)
+            c = cells[j]; cell_margins(c)
             if is_total: shade(c, "E9EDF0")
             elif zebra and i % 2 == 1: shade(c, "F5F7F9")
             p = c.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
             if j >= align_right_from: p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-            run(p, str(val), font_size, bold=is_total or j == 0 and is_total,
-                color=NAVY if is_total else INK)
+            run(p, str(val), font_size, bold=is_total, color=NAVY if is_total else INK)
     if widths:
         for j, w in enumerate(widths):
-            for row in t.rows:
-                row.cells[j].width = Inches(w)
+            for row_ in t.rows: row_.cells[j].width = Inches(w)
     doc.add_paragraph().paragraph_format.space_after = Pt(2)
     return t
 
 def kpi_band(items):
-    """items: list of (value, label). Renders a shaded KPI strip."""
-    t = doc.add_table(rows=2, cols=len(items))
-    t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    t = doc.add_table(rows=2, cols=len(items)); t.alignment = WD_TABLE_ALIGNMENT.CENTER
     no_borders(t)
     for j, (val, label) in enumerate(items):
-        cv = t.rows[0].cells[j]; cl = t.rows[1].cells[j]
+        cv, cl = t.rows[0].cells[j], t.rows[1].cells[j]
         shade(cv, "0F2942"); shade(cl, "0F2942")
-        set_cell_margins(cv, top=90, bottom=10); set_cell_margins(cl, top=0, bottom=90)
+        cell_margins(cv, top=90, bottom=10); cell_margins(cl, top=0, bottom=90)
         pv = cv.paragraphs[0]; pv.alignment = WD_ALIGN_PARAGRAPH.CENTER; pv.paragraph_format.space_after = Pt(0)
-        run(pv, val, 17, True, WHITE)
+        run(pv, val, 16, True, WHITE)
         pl = cl.paragraphs[0]; pl.alignment = WD_ALIGN_PARAGRAPH.CENTER; pl.paragraph_format.space_after = Pt(0)
         run(pl, label, 8, False, RGBColor(0xC7, 0xD3, 0xDE))
     doc.add_paragraph().paragraph_format.space_after = Pt(4)
-    return t
 
-def usd(v):  # v in USD 000
-    return f"${v:,.0f}K" if v < 1000 else f"${v/1000:.2f}M"
-
-def money0(v):
-    return f"{v:,.0f}"
+def K(v): return f"{v:,.0f}"
+def MM(v): return f"${v/1e6:.2f}M"
 
 # =====================================================================
-# COVER PAGE
+# COVER
 # =====================================================================
 sec = doc.sections[0]
 sec.top_margin = Inches(0.9); sec.bottom_margin = Inches(0.8)
 sec.left_margin = Inches(0.9); sec.right_margin = Inches(0.9)
 
-# Top navy band with company name
-def cover_band():
-    t = doc.add_table(rows=1, cols=1)
-    no_borders(t)
-    c = t.rows[0].cells[0]; shade(c, "0F2942")
-    set_cell_margins(c, top=260, bottom=260, left=260, right=260)
-    p = c.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(0)
-    run(p, "NORCO", 40, True, WHITE)
-    p2 = c.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER; p2.paragraph_format.space_after = Pt(0)
-    run(p2, "GENERAL TRADING L.L.C.", 13, True, RGBColor(0xC8, 0x89, 0x2A))
-    p3 = c.add_paragraph(); p3.alignment = WD_ALIGN_PARAGRAPH.CENTER; p3.paragraph_format.space_before = Pt(6); p3.paragraph_format.space_after = Pt(0)
-    run(p3, "Energy Storage  ·  Houseware Distribution", 10.5, False, RGBColor(0xC7, 0xD3, 0xDE))
-
 para(space_after=14)
-cover_band()
+t = doc.add_table(rows=1, cols=1); no_borders(t)
+c = t.rows[0].cells[0]; shade(c, "0F2942"); cell_margins(c, 260, 260, 260, 260)
+p = c.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(0)
+run(p, "NORCO", 40, True, WHITE)
+p2 = c.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER; p2.paragraph_format.space_after = Pt(0)
+run(p2, "EGYPT  ·  GENERAL TRADING", 13, True, GOLD)
+p3 = c.add_paragraph(); p3.alignment = WD_ALIGN_PARAGRAPH.CENTER
+p3.paragraph_format.space_before = Pt(6); p3.paragraph_format.space_after = Pt(0)
+run(p3, "Energy Storage  ·  Houseware Distribution", 10.5, False, RGBColor(0xC7, 0xD3, 0xDE))
 para(space_after=20)
 para("BUSINESS PLAN & INVESTMENT PROPOSAL", 20, True, NAVY, WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 para("A Two-Division Distribution Platform for North & East Africa", 13, False, TEAL,
      WD_ALIGN_PARAGRAPH.CENTER, space_after=18, italic=True)
 
-# Two-division summary boxes
 tb = doc.add_table(rows=1, cols=2); tb.alignment = WD_TABLE_ALIGNMENT.CENTER
-hairline_borders(tb, "C8892A")
-for cell, title, sub, fill in [
-    (tb.rows[0].cells[0], "VESTWOODS", "Haier Energy lithium battery\nenergy storage systems", "F3F5F7"),
-    (tb.rows[0].cells[1], "AL REEM PLASTICS", "Premium houseware &\nplastic products from Türkiye", "F3F5F7")]:
-    shade(cell, fill); set_cell_margins(cell, top=150, bottom=150, left=150, right=150)
-    p = cell.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(2)
-    run(p, title, 13, True, NAVY)
+hairline(tb, "C8892A")
+for cell_, title_, sub in [
+    (tb.rows[0].cells[0], "VESTWOODS", "Haier Energy lithium battery storage\nEgypt · Sudan · Algeria · Libya"),
+    (tb.rows[0].cells[1], "AL REEM PLASTICS", "Premium houseware from the group's\nAngola plant · Egypt · Sudan")]:
+    shade(cell_, "F3F5F7"); cell_margins(cell_, 150, 150, 150, 150)
+    p = cell_.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(2)
+    run(p, title_, 13, True, NAVY)
     for line in sub.split("\n"):
-        pp = cell.add_paragraph(); pp.alignment = WD_ALIGN_PARAGRAPH.CENTER; pp.paragraph_format.space_after = Pt(0)
+        pp = cell_.add_paragraph(); pp.alignment = WD_ALIGN_PARAGRAPH.CENTER; pp.paragraph_format.space_after = Pt(0)
         run(pp, line, 9.5, False, MUTED)
 para(space_after=18)
+para("August 2026 – July 2031   |   Investment into NORCO Egypt", 11, True, INK,
+     WD_ALIGN_PARAGRAPH.CENTER, space_after=14)
 
-para("Egypt  ·  Sudan  ·  Libya  ·  Algeria   |   August 2026 – July 2031", 11, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=14)
-
-# Ask highlight box
 t = doc.add_table(rows=1, cols=1); t.alignment = WD_TABLE_ALIGNMENT.CENTER
-no_borders(t); c = t.rows[0].cells[0]; shade(c, "C8892A")
-set_cell_margins(c, top=130, bottom=130, left=200, right=200)
+no_borders(t); c = t.rows[0].cells[0]; shade(c, "C8892A"); cell_margins(c, 130, 130, 200, 200)
 p = c.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(0)
-run(p, "Investment Sought:  USD 2,000,000", 15, True, WHITE)
+run(p, "Investment Sought:  USD 1,500,000  —  50% of NORCO Egypt", 14, True, WHITE)
 p2 = c.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER; p2.paragraph_format.space_after = Pt(0)
-run(p2, "core raise  (band USD 1,000,000 – 2,500,000)", 10, False, RGBColor(0xFF, 0xF4, 0xDF))
+run(p2, "funding requirement band USD 1,000,000 – 1,500,000", 10, False, RGBColor(0xFF, 0xF4, 0xDF))
 para(space_after=20)
-
 para("Prepared by  Fadi Jannan — Managing Director", 10.5, True, INK, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
 para("Dubai, UAE  ·  Cairo, Egypt   |   +971 58 509 3383  ·  +20 10 5544 2066", 9.5, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, space_after=2)
 para("f.jannan@norcotrading.com   ·   www.norcotrading.com", 9.5, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, space_after=14)
 para("14 July 2026  ·  Version 5.0 (Group)  ·  Strictly Private & Confidential", 9, True, MUTED, WD_ALIGN_PARAGRAPH.CENTER)
-
 doc.add_page_break()
 
-# =====================================================================
-# FOOTER (page numbers) on main sections
-# =====================================================================
-def add_footer(section):
-    footer = section.footer
-    p = footer.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run(p, "NORCO General Trading L.L.C.  ·  Business Plan & Investment Proposal  ·  Strictly Private & Confidential", 7.5, False, MUTED)
-add_footer(sec)
+footer = sec.footer.paragraphs[0]; footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+run(footer, "NORCO Egypt  ·  Business Plan & Investment Proposal V5  ·  Strictly Private & Confidential", 7.5, False, MUTED)
 
 # =====================================================================
 # 1. EXECUTIVE SUMMARY
 # =====================================================================
 h1("1", "Executive Summary")
-para("NORCO General Trading L.L.C. is a UAE- and Egypt-registered distribution company "
-     "operating two complementary product divisions across four high-growth North and East "
-     "African markets. Commercial operations begin in August 2026 from an already-renovated, "
-     "operating showroom in 6th October City, Cairo.", 10.5, space_after=8)
+para("NORCO Egypt is a Cairo-based distribution company operating two complementary product "
+     "divisions, backed by NORCO General Trading L.L.C. (UAE), which holds the group's supplier "
+     "relationships and 20% of the Egyptian company. Commercial operations begin in August 2026 "
+     "from an already-renovated, operating showroom in 6th October City.", space_after=8)
 
 h2("Two divisions, one platform")
 bullet([("Vestwoods (Haier Energy) — ", True),
-        ("NORCO is the exclusive distributor of Vestwoods lithium battery energy storage "
-         "systems for Egypt, with three live export corridors: a committed Sudan buyer ready to "
-         "order on arrival of the first containers, an Algerian company in advanced agency "
-         "negotiation, and Libya launching in Year 2.", False)])
+        ("exclusive distribution of lithium battery energy storage systems for Egypt, with three "
+         "export corridors: a committed Sudan buyer that orders on arrival of the first containers, "
+         "an Algerian agency in advanced negotiation ordering on 100% letters of credit, and Libya "
+         "from Year 2. 13 containers in Year 1 growing to 41 by Year 5.", False)])
 bullet([("Al Reem Plastics — ", True),
-        ("a verified 147-SKU range of premium houseware and plastic products sourced from "
-         "Türkiye. High-turnover, lower-ticket, cash-generative goods that diversify NORCO's "
-         "revenue, deepen its dealer relationships and share the same warehouse, showroom and "
-         "logistics platform — at low incremental cost.", False)])
+        ("premium household plastics produced at the group's affiliated plant in Angola and supplied "
+         "to NORCO at 30% below price list — a locked-in margin of 30% of revenue at retail and 20% "
+         "at wholesale. Egypt and Sudan first: 15 containers in Year 1 growing to 35 by Year 5.", False)])
 
 para(space_after=2)
-kpi_band([("$101.4M", "5-YEAR GROUP REVENUE"), ("$13.8M", "5-YEAR NET PROFIT"),
-          ("Month 3", "OPERATING BREAK-EVEN"), ("60% / 28%", "INVESTOR IRR — OPT A / B")])
+kpi_band([(MM(M.REV_5YR), "5-YEAR REVENUE"), (MM(M.NP_5YR), "5-YEAR NET PROFIT"),
+          ("Month 4", "OPERATING BREAK-EVEN"), (f"{M.INV_IRR*100:.0f}% / {M.INV_MOIC:.1f}x", "INVESTOR IRR / MOIC")])
 
 h2("Why the two divisions fit together")
-para("Vestwoods is a high-value, capital-intensive business: every container is prepaid in Year 1, "
-     "so it needs working capital up front but delivers large gross-profit dollars. Al Reem Plastics "
-     "is the mirror image — low unit cost, fast inventory turns, everyday demand that is insensitive "
-     "to the economic cycle. Together they smooth NORCO's cash flow, keep the sales team and "
-     "showrooms productive between battery shipments, and turn one distribution licence, one "
-     "warehouse and one management team into two revenue engines.", 10.5, space_after=8)
+para("Vestwoods is high-ticket and capital-intensive — every Year-1 container is prepaid, which is "
+     "exactly why the raise is needed. Al Reem is the mirror image: low unit cost, 20,000+ units per "
+     "container, everyday demand and fast cash turns. Together they smooth the cash cycle, keep two "
+     "showrooms and one sales force productive every week of the year, and diversify the company "
+     "across two unrelated demand drivers — Egypt's power crisis and Egypt's household consumption.",
+     space_after=8)
 
-h2("The ask")
-para("USD 2,000,000 core raise, released in three milestone-gated tranches (Section 8), fully "
-     "deployable within 18 months of the August 2026 start. Band: USD 1.0M minimum to USD 2.5M "
-     "full acceleration. The capital funds Vestwoods' Year-1 container prepayments and Al Reem's "
-     "opening houseware inventory; from Month 13 Vestwoods converts to supplier credit and the "
-     "group becomes self-funding.", 10.5, space_after=8)
-
-h2("The returns")
-bullet([("Group 5-year performance — ", True),
-        (f"USD {M.REV_5YR/1000:.1f}M revenue, USD {M.GP_5YR/1000:.1f}M gross profit, "
-         f"USD {M.NP_5YR/1000:.1f}M net profit. Year 1: USD {M.REV[0]/1000:.2f}M revenue and "
-         f"USD {M.NP[0]:,}K net profit, with operating break-even in Month 3.", False)])
-bullet([("Option A — 50% equity: ", True),
-        (f"dividends plus retained stake deliver a {M.OPT_A_IRR*100:.0f}% IRR and {M.OPT_A_MOIC:.1f}x "
-         f"MOIC; dividends alone return {M.OPT_A_DIV_MULTIPLE:.2f}x the capital inside five years.", False)])
-bullet([("Option B — 25% profit share + capital redemption at Year 5: ", True),
-        (f"{M.OPT_B_IRR*100:.0f}% IRR, {M.OPT_B_MOIC:.2f}x MOIC, with the investor's capital "
-         "repaid at par.", False)])
+h2("The ask and the return")
+bullet([("USD 1,500,000 for 50% of NORCO Egypt ", True),
+        ("(band USD 1.0M – 1.5M), released in two tranches — USD 1.0M at close and USD 0.5M at "
+         "Month 4 against verified milestones. The capital covers the peak working-capital "
+         f"requirement of USD {K(abs(M.PEAK_DEFICIT))} created by Vestwoods' Year-1 prepayment terms.", False)])
+bullet([("Profitable in Year 1 — ", True),
+        (f"USD {MM(M.REV[0])} revenue and USD {K(M.NP[0])} net profit, with operating break-even in "
+         f"Month 4 and cumulative break-even in Month 8. Five-year net profit USD {MM(M.NP_5YR)}; "
+         "cumulative profit passes the full USD 1.5M investment during Year 3.", False)])
+bullet([("Investor cash flow — ", True),
+        ("100% of net profit is distributed annually in arrears; the investor receives half of every "
+         f"distribution plus a 50% share of the terminal value (5× Year-5 net profit): "
+         f"{M.INV_IRR*100:.0f}% IRR and {M.INV_MOIC:.1f}x MOIC over five years.", False)])
 
 h2("Proof already on the table")
 para("The founder has invested USD 14,517 pre-launch — including EGP 31,948.50 of product stock "
      "purchased and sold through the operating showroom before launch. UAE and Egypt registration, "
-     "import permits, GOEIC application, fit-out and branding are complete. The Al Reem Plastics "
-     "range is fully costed at the SKU level and the supplier relationship is in place.", 10.5, space_after=6)
-
-add_chart("revenue_by_division.png", 6.4)
-
+     "import permits, GOEIC application, fit-out and branding are complete. The Al Reem range is "
+     "costed SKU-by-SKU from the July-2026 packing list, and Vestwoods pricing is verified against "
+     "the supplier's container packing list.", space_after=6)
+add_chart("revenue_by_division.png")
 doc.add_page_break()
 
 # =====================================================================
-# 2. COMPANY DESCRIPTION & OWNERSHIP
+# 2. COMPANY, STRUCTURE & OWNERSHIP
 # =====================================================================
-h1("2", "Company Description & Ownership")
-bullet([("Legal structure — ", True),
-        ("NORCO General Trading L.L.C., UAE-registered (Dubai trade licence active) with Egyptian "
-         "commercial registration, import permits and GOEIC application complete. Operations are led "
-         "from Cairo; supplier and treasury relationships from Dubai.", False)])
-bullet([("Business model — ", True),
-        ("an asset-light import-and-distribute platform. NORCO imports finished goods, holds them in "
-         "its 6th October City warehouse, and sells through its own showrooms, a growing dealer "
-         "network, and export sub-distributors — across two product divisions.", False)])
-bullet([("Locations — ", True),
-        ("Showroom #1: 6th October City (operational, 2-year lease). Showroom #2: Fifth Settlement "
-         "(opens Month 1). Office: Fifth Settlement, 100 sqm. Warehouse: 6th October City, "
-         "300–500 sqm — shared by both divisions.", False)])
+h1("2", "Company, Structure & Ownership")
+bullet([("The investment vehicle — ", True),
+        ("investors subscribe directly into NORCO Egypt, the operating company that owns the "
+         "showrooms, inventory, receivables and Egyptian licences. NORCO General Trading L.L.C. "
+         "(UAE, Dubai trade licence active) is a 20% shareholder and contributes the exclusive "
+         "Vestwoods agency and the Al Reem (Angola) supply relationship under long-term agreements.", False)])
+bullet([("Facilities — ", True),
+        ("Showroom #1: 6th October City (operational, 2-year lease, EGP 10,000/month). "
+         "Showroom #2: New Cairo, ~100 sqm, opens Month 1 (USD 3,500/month). Office: New Cairo, "
+         "~100 sqm fully furnished (USD 3,000/month). Warehouse: 300–700 sqm in 6th October, "
+         "Sheikh Zayed or New Cairo, selected on cost (USD 3,000/month planned).", False)])
 
-h2("2.1  Proposed distribution of shares")
-para("The company currently has three shareholders. Under the proposed 50% investor scenario, the "
-     "existing partners dilute proportionally as follows:", 10.5, space_after=6)
-sh_rows = [[name, f"{cur*100:.0f}%" if cur else "—", f"{post*100:.0f}%"]
-           for name, cur, post in M.SHAREHOLDING]
-sh_rows.append(["Total", "100%", "100%"])
-table(["Shareholder", "Current", "Post-investment (50%)"], sh_rows,
-      widths=[3.9, 1.3, 1.7], total_row=True, align_right_from=1)
-para("Alternative structure available: no equity — 25% net-profit share plus capital redemption at "
-     "par at the end of Year 5 (Section 8). The Chairman remains executive lead and exclusive-agency "
-     "holder under both structures.", 9.5, italic=True, color=MUTED, space_after=8)
+h2("2.1  Shareholding of NORCO Egypt")
+sh_rows = [[name, f"{pct*100:.0f}%", note] for name, pct, note in M.SHAREHOLDING]
+sh_rows.append(["Total", "100%", ""])
+table(["Shareholder", "NORCO Egypt", "Notes"], sh_rows, widths=[2.7, 1.0, 3.2],
+      total_row=True, align_right_from=1, font_size=9)
+para("The founder's combined interest is 40% — 20% held directly plus 20% held through NORCO UAE, "
+     "which he controls. The Chairman remains executive lead and agency holder.", 9.5,
+     italic=True, color=MUTED, space_after=8)
 
 h2("2.2  Pre-operational investment — USD 14,517 already spent")
 preop = [
@@ -348,303 +291,304 @@ preop = [
     ["Total pre-operational investment", "", "14,517"],
 ]
 table(["Item", "Original", "USD"], preop, widths=[4.4, 1.6, 0.9], total_row=True, align_right_from=2)
-
 doc.add_page_break()
 
 # =====================================================================
 # 3. THE TWO DIVISIONS
 # =====================================================================
 h1("3", "The Two Divisions")
-
 h2("3.1  Vestwoods — Haier Energy battery storage")
-para("Vestwoods is a Haier Energy brand of lithium (LFP) battery energy storage systems, hybrid "
-     "inverters and telecom power. NORCO holds the exclusive Egypt agency with price control. The "
-     "product answers a purchase of necessity: chronic load-shedding, diesel-price escalation and a "
-     "national solar push across residential, telecom and commercial & industrial (C&I) segments. "
-     "Vestwoods prices 15–25% below premium brands with Haier-backed quality and a 5-year "
-     "warranty; grey-market imports cannot match warranty, service or price control.", 10.5, space_after=6)
-para("Full Vestwoods range ships in 40ft FCL containers (340 units, landed USD 239,805 each), "
-     "China → Alexandria, 45–55 day lead time. Verified pricing (USD, EGP 53):", 10.5, space_after=6)
-vw_price = [
-    ["VE51100L", "Smart Battery 5.12 kWh", "672", "853", "1,137", "1,364"],
-    ["VE51200L", "Smart Battery 10.24 kWh", "1,200", "1,508", "2,011", "2,413"],
-    ["VE51314L", "Smart Battery 16.07 kWh", "1,560", "1,955", "2,607", "3,128"],
-    ["HEH-S6KB3-LV", "Hybrid Inverter 6 kW", "390", "504", "670", "804"],
-    ["VEP1K20", "Rescube All-in-One 2 kWh", "365", "473", "628", "754"],
-    ["VEB 704 / 832", "C&I Cabinets 221 / 261 kWh", "27,300+", "33,880+", "38,973+", "project"],
-    ["VT48100E / VT48200", "Telecom 48V batteries", "563 / 980", "943 / 1,380", "1,044 / 1,530", "B2B"],
-]
-table(["Model", "Description", "Factory", "Landed", "Wholesale", "Retail"], vw_price,
-      widths=[1.3, 2.0, 0.85, 0.85, 0.95, 0.85], align_right_from=2, font_size=8.8)
+para("Vestwoods is a Haier Energy brand of lithium (LFP) battery storage, hybrid inverters and "
+     "telecom power. NORCO holds the exclusive Egypt agency with price control. Chronic "
+     "load-shedding, diesel escalation and the national solar push make storage a purchase of "
+     "necessity across residential, telecom and C&I segments. Each 40ft container carries 340 "
+     "units with a fully-landed cost of USD 342,316; the same container sells for USD 472,680 at "
+     "retail (28% margin) or USD 393,882 at wholesale (13% margin). Egypt sells a 50/50 "
+     "retail-wholesale mix; Sudan, Algeria and Libya buy at wholesale.", space_after=6)
+vw_price = [[m_, d, f"{q}", K(f_), K(cg), K(w), K(rt)]
+            for m_, d, q, f_, cg, w, rt in M.VW_MIX]
+vw_price.append(["Container", "340 units, 40ft FCL", "340", K(M.VW_CONT_SUPPLIER-6865),
+                 K(M.VW_CONT_COGS), K(round(M.VW_CONT_WHOLESALE)), K(round(M.VW_CONT_RETAIL))])
+table(["Model", "Description", "Qty", "Factory", "Landed COGS", "Wholesale", "Retail"],
+      vw_price, widths=[1.15, 1.9, 0.5, 0.8, 0.95, 0.9, 0.85], align_right_from=2,
+      font_size=8.6, total_row=True)
 
-h2("3.2  Al Reem Plastics — premium houseware from Türkiye")
-para("Al Reem Plastics is a full range of 147 stock-keeping units of household plastic products "
-     "— storage drawers and boxes, kitchen and food containers, laundry and cleaning ware, "
-     "bowls and tableware, planters, chairs and tables. The goods are sourced from established "
-     "Türkiye manufacturers and imported in mixed 40ft containers. Every SKU is costed to the "
-     "cent: landed cost, wholesale price (COGS ×15%) and retail price (COGS ×38%) are already "
-     "modelled in NORCO's pricing sheet.", 10.5, space_after=6)
-para("Strategically, Al Reem does four things for NORCO:", 10.5, bold=True, space_after=4)
-bullet([("Diversification — ", True), ("everyday, cycle-resistant demand that is uncorrelated with "
-        "the energy-capex cycle and unaffected by grid policy.", False)])
-bullet([("Cash velocity — ", True), ("low unit cost and fast turns generate working capital that "
-        "helps fund the heavier Vestwoods inventory.", False)])
-bullet([("Platform leverage — ", True), ("shares the same warehouse, showrooms, logistics and "
-        "management, so gross margin drops almost straight to contribution.", False)])
-bullet([("Channel depth — ", True), ("gives NORCO a second reason to call on every retailer and "
-        "wholesaler, widening the dealer network that also sells Vestwoods.", False)])
-para("Representative Al Reem unit economics (verified, USD):", 10.5, space_after=6, space_before=4)
-ar_price = [
-    ["Storage Drawers (4) w/ compartment", "23.98", "27.75", "33.30", "16 / 39%"],
-    ["Clothes Drier", "19.95", "23.12", "27.74", "16 / 39%"],
-    ["90L Waste bin with cover", "11.33", "13.21", "15.85", "17 / 40%"],
-    ["50L Waste bin", "9.04", "10.57", "12.68", "17 / 40%"],
-    ["Large Laundry Basket with Lid", "9.78", "11.43", "13.71", "17 / 40%"],
-    ["13.5L Rectangular Food Container", "3.77", "4.51", "5.41", "20 / 43%"],
-    ["Sugar box with cover & spoon", "0.67", "0.94", "1.13", "40 / 68%"],
+h2("3.2  Al Reem Plastics — the group's Angola plant")
+para("Al Reem Plastics is the group's affiliated houseware producer based in Angola. Because the "
+     "supply relationship sits inside the group, NORCO buys at 30% below price list — locking a "
+     "margin of 30% of revenue on retail sales and 20% on wholesale, protected from supplier "
+     "price pressure. The range covers storage, kitchen and food containers, laundry and cleaning "
+     "ware, bowls, planters and furniture. The July-2026 Egypt packing list — 69 SKUs, 20,488 "
+     "units per 40ft container — is costed line-by-line at USD 59,343 landed.", space_after=6)
+ar_rows = [
+    ["Units per 40ft container", f"{M.AR_UNITS:,}", "69 SKUs (July-2026 packing list)"],
+    ["Landed cost per container", K(M.AR_CONT_COST), "bought 30% below price list"],
+    ["Egypt revenue per container", K(round(M.AR_CONT_EGYPT)), "50% retail / 50% wholesale — 25.3% margin"],
+    ["Sudan revenue per container", K(round(M.AR_CONT_WHOLESALE)), "wholesale only — 20.0% margin"],
+    ["Egypt gross profit per container", K(round(M.AR_GP_EGYPT)), ""],
+    ["Sudan gross profit per container", K(round(M.AR_GP_SUDAN)), ""],
 ]
-table(["Representative SKU", "Landed COGS", "Wholesale", "Retail", "GM% W/R"], ar_price,
-      widths=[2.9, 1.05, 1.0, 0.85, 1.0], align_right_from=1, font_size=8.8)
-para("Across the 147-SKU range, blended gross margin runs ~19% wholesale to ~28% at retail; NORCO "
-     "models the division at a 19% blended margin in Year 1, rising to 23% by Year 5 as the "
-     "own-showroom retail mix and brand pull grow.", 9.5, italic=True, color=MUTED, space_after=6)
-
+table(["Container economics", "USD", "Basis"], ar_rows, widths=[2.6, 1.1, 3.2], align_right_from=1, font_size=9)
+para("Strategically, Al Reem gives NORCO cash velocity (20,000+ units turn in weeks, not months), "
+     "cycle-resistant demand, and a second reason to call on every retailer that also buys "
+     "batteries — at almost no incremental overhead, since it shares the warehouse, showrooms, "
+     "logistics and sales team.", space_after=6)
 doc.add_page_break()
 
 # =====================================================================
-# 4. MARKET ANALYSIS
+# 4. MARKET ANALYSIS & COMPETITIVE PRICING STUDY
 # =====================================================================
-h1("4", "Market Analysis")
-h2("4.1  Vestwoods — four energy-storage corridors")
-bullet([("Egypt — ", True), ("chronic load-shedding, diesel escalation and the national solar push "
-        "make lithium storage a purchase of necessity across residential, telecom and C&I segments. "
-        "Vestwoods' price/quality position and warranty beat both premium brands and grey-market "
-        "imports. 12 → 40 containers over five years.", False)])
-bullet([("Sudan — ", True), ("committed buyer already identified; orders trigger on arrival of the "
-        "first containers at NORCO's warehouse, on 50% advance + 50% on delivery. Grid instability "
-        "makes solar-household and telecom kits essential goods. 4 → 20 containers.", False)])
-bullet([("Algeria — ", True), ("NORCO is in active negotiation with an Algerian company to take the "
-        "agency and place first orders by the end of Year 1. Structured FOB Jebel Ali to a licensed "
-        "importer under the bank-domiciliation regime, 100% LC before shipment, zero in-country "
-        "exposure. 1 → 9 containers.", False)])
+h1("4", "Market Analysis & Competitive Pricing Study")
+h2("4.1  Egypt energy storage — the demand driver")
+para("Egypt's grid has run structural summer deficits since 2023; load-shedding, diesel-price "
+     "escalation and net-metering under Law 87/2015 have made battery storage a mainstream "
+     "purchase for villas, clinics, telecom towers and light industry. The addressable segments "
+     "NORCO serves — residential hybrid systems, telecom DC power and C&I backup — are precisely "
+     "where lithium replaces lead-acid and diesel.", space_after=6)
+
+h2("4.2  Battery price benchmarking — where Vestwoods wins")
+para("NORCO's June-2026 market survey of Cairo retail prices for 5 kWh-class lithium batteries "
+     "(installed base brands, incl. VAT, at EGP 53/USD):", space_after=6)
+bat_rows = []
+for brand, model_, usd, kwh, warranty, tier in M.BATTERY_COMPETITORS:
+    bat_rows.append([brand, model_, K(usd), f"{usd/kwh:,.0f}", warranty, tier])
+table(["Brand", "Model (5 kWh class)", "Retail USD", "USD/kWh", "Warranty & service", "Position"],
+      bat_rows, widths=[1.25, 1.35, 0.8, 0.7, 1.6, 1.4], align_right_from=2, font_size=8.4)
+add_chart("battery_prices.png", 6.2)
+bullet([("The pricing wedge — ", True),
+        ("Vestwoods retails 15–26% below tier-1 premium brands (Pylontech, Huawei) on a per-kWh "
+         "basis while carrying Haier manufacturing pedigree and a 5-year warranty backed by "
+         "NORCO's Cairo service bench.", False)])
+bullet([("Against the grey market — ", True),
+        ("unbranded imports undercut everyone by ~15% but carry no warranty, no BMS support and no "
+         "spare parts. Vestwoods' exclusive agency lets NORCO hold price while winning the "
+         "warranty-sensitive buyer — installers, telecoms and C&I clients.", False)])
+para("Indicative street prices, NORCO market survey June 2026; tier-1 pricing varies with FX and "
+     "customs cycles.", 8.5, italic=True, color=MUTED, space_after=8)
+
+h2("4.3  Egypt houseware — Al Reem vs. the local shelf")
+para("Egypt's houseware market is dominated by capable local producers (El Helal & Silver Star, "
+     "Winner Plast, Max Plast, Bager) with imported Turkish and Chinese brands at a 25–40% premium "
+     "on modern-trade shelves (Carrefour, Jumia, Noon). Al Reem enters at local-brand price points "
+     "with imported-brand finish — and NORCO's 30% supply discount preserves full margin at those "
+     "prices:", space_after=6)
+hw_rows = [[cat, f"{alr:,}", loc, imp] for cat, alr, loc, imp in M.HOUSEWARE_COMPETITORS]
+table(["Category (retail, EGP)", "Al Reem", "Local brands", "Imported brands"],
+      hw_rows, widths=[2.4, 0.9, 2.0, 1.6], align_right_from=1, font_size=8.8)
+para("Local-brand ranges from Egyptian modern-trade shelf checks (Carrefour Egypt, Jumia, Noon), "
+     "June 2026.", 8.5, italic=True, color=MUTED, space_after=8)
+
+h2("4.4  Export corridors")
+bullet([("Sudan — ", True), ("committed buyer identified; orders trigger on arrival of the first "
+        "containers at NORCO's warehouse on 50% advance + 50% delivery terms. Post-conflict "
+        "reconstruction demand covers both divisions: solar-household kits and affordable houseware.", False)])
+bullet([("Algeria — ", True), ("agency negotiation in progress with first Vestwoods orders by "
+        "Month 8; structured FOB Jebel Ali to a licensed importer under the bank-domiciliation "
+        "regime, 100% LC before shipment — zero in-country exposure.", False)])
 bullet([("Libya — ", True), ("dual-hub distributors (Tripoli + Benghazi) from Year 2 on advance/LC "
-        "terms; 2 → 7 containers.", False)])
-add_chart("revenue_by_market.png", 6.2)
+        "terms; chronic-outage residential and telecom demand.", False)])
 
-h2("4.2  Al Reem Plastics — everyday houseware demand")
-para("Egypt's ~110 million people, rapid new-city housing (New Cairo, 6th October, the New "
-     "Administrative Capital) and a large informal-retail base drive constant replacement demand for "
-     "affordable, durable household plastics. Türkiye-made goods carry a quality-and-design premium "
-     "over local production while remaining price-competitive after duty. The same Sudan and Libya "
-     "corridors that take Vestwoods also absorb houseware through NORCO's export sub-distributors. "
-     "NORCO enters at wholesale to retailers and hypermarkets, and at retail through its own "
-     "showrooms and online channel.", 10.5, space_after=8)
-
-h2("4.3  SWOT — NORCO Group")
+h2("4.5  SWOT — NORCO Egypt")
 sw = doc.add_table(rows=2, cols=2); sw.alignment = WD_TABLE_ALIGNMENT.CENTER
-hairline_borders(sw)
+hairline(sw)
 swot = [
     ("Strengths", "F0F6F2",
-     "Two complementary divisions on one platform; Vestwoods exclusive agency + price control; "
-     "operating showroom with pre-launch sales; committed Sudan buyer; Al Reem fully SKU-costed; Haier brand."),
+     "Exclusive Vestwoods agency + price control; group-owned Al Reem supply at locked 30%/20% margins; "
+     "operating showroom with pre-launch sales; committed Sudan buyer; verified SKU-level costing."),
     ("Weaknesses", "FBF3F0",
-     "Year-1 Vestwoods prepayment strains working capital; execution depends on the raise closing "
-     "on time; two supply chains to manage; new houseware brand-building in Egypt."),
+     "Year-1 Vestwoods prepayment strains working capital; thin wholesale margins demand volume discipline; "
+     "two supply chains to coordinate; new houseware brand in Egypt."),
     ("Opportunities", "F0F6F2",
-     "Egypt energy tenders (NUCA/EEHC, Law 5/2015 CKD roadmap); telecom fleet contracts; houseware "
-     "hypermarket listings; four-market compounding across both divisions."),
+     "Egypt tenders (NUCA/EEHC); telecom fleet contracts; hypermarket listings for Al Reem; "
+     "Libya launch; CKD assembly under Egypt's localisation programme."),
     ("Threats", "FBF3F0",
-     "EGP devaluation; customs delays; grey-market pricing; regional instability in export corridors; "
-     "low-cost local plastics competition."),
+     "EGP devaluation; customs delays; grey-market battery pricing; local plastics price wars; "
+     "regional instability in export corridors."),
 ]
-for idx, (title, fill, body) in enumerate(swot):
-    cell = sw.rows[idx//2].cells[idx % 2]
-    shade(cell, fill); set_cell_margins(cell, top=110, bottom=110, left=140, right=140)
-    p = cell.paragraphs[0]; p.paragraph_format.space_after = Pt(3)
-    run(p, title, 11, True, NAVY)
-    pb = cell.add_paragraph(); pb.paragraph_format.space_after = Pt(0)
+for idx, (title_, fill, body) in enumerate(swot):
+    cell_ = sw.rows[idx//2].cells[idx % 2]
+    shade(cell_, fill); cell_margins(cell_, 110, 110, 140, 140)
+    p = cell_.paragraphs[0]; p.paragraph_format.space_after = Pt(3)
+    run(p, title_, 11, True, NAVY)
+    pb = cell_.add_paragraph(); pb.paragraph_format.space_after = Pt(0)
     run(pb, body, 9, False, INK)
-doc.add_paragraph().paragraph_format.space_after = Pt(2)
-
 doc.add_page_break()
 
 # =====================================================================
 # 5. SUPPLIER & CUSTOMER TERMS
 # =====================================================================
 h1("5", "Supplier & Customer Terms — the Cash-Flow Engine")
-para("The structure of the plan is driven by payment terms. Vestwoods requires full prepayment in "
-     "Year 1, which is exactly why the raise is needed; Al Reem and the export customers generate "
-     "cash quickly, which is exactly what funds the group thereafter.", 10.5, space_after=8)
 terms = [
-    ["Vestwoods — Year 1 (POs Aug-26 – Jul-27)", "100% payment before shipment, every container",
-     "Capital sits ~2 months ahead of revenue; peak working-capital need in Month 4"],
-    ["Vestwoods — Year 2+ (POs from Month 13)", "10% downpayment + 90% at 3-month credit",
-     "~90% of container capital released; Year 2+ growth self-funding"],
-    ["Al Reem Plastics — supplier", "Deposit + balance against shipping documents",
-     "Lower ticket size; inventory turns fast, releasing cash within the quarter"],
-    ["Egypt customers", "30–60 days (avg 45); 1-month collection lag", "Held to agreed limits; stop-supply discipline"],
-    ["Sudan / Libya", "50% advance + 50% on delivery (same month)", "Cash received before/at shipment — working-capital positive"],
+    ["Vestwoods — Year 1 (POs Aug-26 – Jul-27)", "100% payment before shipment",
+     "USD 239,805 prepaid per container ~2 months before sale; the reason for the raise"],
+    ["Vestwoods — Year 2+ (POs from Month 13)", "10% down + 90% at 3-month credit",
+     "Releases ~90% of container capital; Year 2+ growth self-funding"],
+    ["Al Reem Plastics (Angola, affiliate)", "Paid against shipping documents",
+     "Flexible group terms; ~1 month between payment and sale"],
+    ["Egypt customers", "30–60 days (avg 45); 1-month lag", "Anchor accounts on agreed limits; stop-supply discipline"],
+    ["Sudan (both divisions)", "50% advance at order + 50% on delivery", "Advances arrive ~2 months before delivery — offsets prepayments"],
     ["Algeria", "100% LC before shipment", "Zero receivable risk; zero in-country exposure"],
+    ["Libya (Year 2+)", "Advance / confirmed LC", "Cash before shipment"],
 ]
-table(["Party / period", "Terms", "Cash impact"], terms, widths=[2.4, 2.3, 2.3],
-      align_right_from=99, font_size=9)
-
+table(["Party / period", "Terms", "Cash impact"], terms, widths=[2.3, 2.1, 2.6],
+      align_right_from=99, font_size=8.8)
 doc.add_page_break()
 
 # =====================================================================
 # 6. FINANCIAL PLAN
 # =====================================================================
 h1("6", "Financial Plan")
-para("All figures USD thousands unless noted. Vestwoods figures follow the founder's vetted "
-     "Business Plan V4; Al Reem Plastics figures are planning projections built on the verified "
-     "April-2026 catalogue unit economics. Planning FX: USD 1 = EGP 53 (spot ~49–51, "
-     "conservative). Corporate tax 22.5% on net profit.", 9.5, italic=True, color=MUTED, space_after=8)
+para("All figures USD. Vestwoods margins per the verified pricing list (COGS 72% of retail "
+     "revenue / 87% of wholesale revenue); Al Reem margins locked by the group supply agreement "
+     "(30% retail / 20% wholesale). Planning FX EGP 53; corporate tax 22.5% with Year-1 loss "
+     "carry-forward. The companion workbook carries the full monthly Year-1 P&L and cash flow.",
+     9.5, italic=True, color=MUTED, space_after=8)
 
 h2("6.1  Consolidated 5-year P&L")
 pl_rows = [
-    ["Vestwoods revenue"] + [money0(v) for v in M.VW_REV],
-    ["Al Reem Plastics revenue"] + [money0(v) for v in M.AR_REV],
-    ["Total revenue"] + [money0(v) for v in M.REV],
-    ["Gross profit"] + [money0(v) for v in M.GP],
-    ["Gross margin %"] + [f"{g/r*100:.0f}%" for g, r in zip(M.GP, M.REV)],
-    ["Operating expenses"] + [money0(v) for v in M.OPEX],
-    ["EBIT"] + [money0(v) for v in M.EBIT],
-    ["Corporate tax (22.5%)"] + [money0(v) for v in M.TAX_AMT],
-    ["Net profit"] + [money0(v) for v in M.NP],
-    ["Net margin %"] + [f"{n/r*100:.1f}%" for n, r in zip(M.NP, M.REV)],
+    ["Vestwoods revenue"] + [K(v) for v in M.VW_REV],
+    ["Al Reem Plastics revenue"] + [K(v) for v in M.AR_REV],
+    ["Total revenue"] + [K(v) for v in M.REV],
+    ["Gross profit"] + [K(v) for v in M.GP],
+    ["Gross margin %"] + [f"{g/r*100:.1f}%" for g, r in zip(M.GP, M.REV)],
+    ["Operating expenses"] + [K(v) for v in M.OPEX],
+    ["EBIT"] + [K(v) for v in M.EBIT],
+    ["Corporate tax (22.5%)"] + [K(v) for v in M.TAX_AMT],
+    ["Net profit"] + [K(v) for v in M.NP],
+    ["Net margin %"] + [f"{m*100:.1f}%" for m in M.NET_MARGIN],
 ]
-table(["USD 000", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], pl_rows,
-      widths=[2.2, 0.9, 0.9, 0.9, 0.9, 0.9], font_size=9)
+table(["USD", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], pl_rows,
+      widths=[1.9, 1.05, 1.05, 1.05, 1.05, 1.05], font_size=8.8)
 add_chart("profit_trend.png", 6.0)
-add_chart("net_margin.png", 6.0)
 
+h2("6.2  Revenue build — markets, divisions and containers")
+mkt_rows = [
+    ["Egypt — Vestwoods (6→15 containers)"] + [K(v) for v in M.VW_MARKET_REV["Egypt"]],
+    ["Egypt — Al Reem (10→20 containers)"] + [K(v) for v in M.AR_MARKET_REV["Egypt"]],
+    ["Sudan — Vestwoods (4→10 containers)"] + [K(v) for v in M.VW_MARKET_REV["Sudan"]],
+    ["Sudan — Al Reem (5→15 containers)"] + [K(v) for v in M.AR_MARKET_REV["Sudan"]],
+    ["Algeria — Vestwoods (3→8, 100% LC)"] + [K(v) for v in M.VW_MARKET_REV["Algeria"]],
+    ["Libya — Vestwoods (0→8, from Y2)"] + [K(v) for v in M.VW_MARKET_REV["Libya"]],
+    ["Total group revenue"] + [K(v) for v in M.REV],
+]
+table(["USD", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], mkt_rows,
+      widths=[2.35, 0.95, 0.95, 0.95, 0.95, 0.95], total_row=True, font_size=8.6)
+add_chart("revenue_by_market.png", 5.9)
+add_chart("containers.png", 5.9)
 doc.add_page_break()
 
-h2("6.2  Revenue build — markets & divisions")
-mkt_rows = [
-    ["Egypt (Vestwoods)"] + [money0(v) for v in M.VW_MARKET_REV["Egypt"]],
-    ["Sudan (Vestwoods)"] + [money0(v) for v in M.VW_MARKET_REV["Sudan"]],
-    ["Libya (Vestwoods)"] + [money0(v) for v in M.VW_MARKET_REV["Libya"]],
-    ["Algeria (Vestwoods)"] + [money0(v) for v in M.VW_MARKET_REV["Algeria"]],
-    ["Al Reem Plastics (all markets)"] + [money0(v) for v in M.AR_REV],
-    ["Total group revenue"] + [money0(v) for v in M.REV],
-]
-table(["USD 000", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], mkt_rows,
-      widths=[2.4, 0.85, 0.85, 0.85, 0.85, 0.85], total_row=True, font_size=9)
-add_chart("containers.png", 6.0)
+h2("6.3  Year 1 — monthly profitability and cash")
+para("Year 1 is modelled month-by-month in the workbook. Egypt revenue ramps from the operating "
+     "showroom in September to a two-showroom, ten-dealer run-rate by summer; Sudan orders land in "
+     "alternate months from January; Algeria's first LC orders ship from March. Operating "
+     "break-even arrives in Month 4 (November 2026) and cumulative break-even in Month 8 "
+     "(March 2027).", space_after=6)
+add_chart("y1_cash.png", 6.0,
+          f"Minimum cash USD {K(M.MIN_CASH_WITH_RAISE)} (Oct-26); Year-1 ending cash USD {K(M.Y1_END_CASH)}.")
 
-h2("6.3  Cash flow & the working-capital story")
-para("Year 1 is the only year that depends on the raise. Vestwoods' 100%-prepayment terms mean "
-     "container capital sits roughly two months ahead of revenue, creating a peak funding need in "
-     "the opening months. From Month 13 the Vestwoods credit switch (10% down + 90% on 3-month "
-     "credit) releases the vast majority of that capital, and Al Reem's fast-turning inventory "
-     "throws off cash from the first quarter. The combined effect: closing cash rises every year "
-     "thereafter, even while paying dividends and rising taxes, with no capital call after "
-     "Tranche 3.", 10.5, space_after=8)
+h2("6.4  Five-year cash flow")
 cf_rows = [
-    ["Customer collections", "6,400", "12,050", "18,300", "25,500", "34,600"],
-    ["Investor capital (T1–T3)", "2,000", "—", "—", "—", "—"],
-    ["Supplier & inventory payments", "(5,540)", "(8,930)", "(13,760)", "(18,940)", "(25,120)"],
-    ["Operating expenses (cash)", "(945)", "(1,400)", "(1,915)", "(2,500)", "(3,465)"],
-    ["Tax paid (prior year, arrears)", "—", "(249)", "(426)", "(709)", "(1,076)"],
-    ["Investor dividends (Option A, 50%)", "—", "(428)", "(734)", "(1,220)", "(1,853)"],
-    ["Capex", "(50)", "(25)", "(30)", "(35)", "(40)"],
-    ["Closing cash position", "1,865", "2,883", "4,318", "6,414", "9,280"],
+    ["Customer collections"] + [K(v) for v in M.CF_COLLECT],
+    ["Investor capital (T1 + T2)", "1,500,000", "—", "—", "—", "—"],
+    ["Supplier & inventory payments"] + [f"({K(v)})" for v in M.CF_SUPPLIER],
+    ["Operating expenses (cash)"] + [f"({K(v)})" for v in M.CF_OPEX],
+    ["Tax paid (prior year, arrears)"] + [("—" if v == 0 else f"({K(v)})") for v in M.CF_TAX],
+    ["Dividends (100% of prior-year profit)"] + [("—" if v == 0 else f"({K(v)})") for v in M.CF_DIV],
+    ["Capex"] + [("—" if v == 0 else f"({K(v)})") for v in M.CAPEX],
+    ["Net annual cash flow"] + [K(v) for v in M.CF_NET],
+    ["Closing cash position"] + [K(v) for v in M.CF_CLOSE],
 ]
-table(["USD 000", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], cf_rows,
-      widths=[2.4, 0.85, 0.85, 0.85, 0.85, 0.85], total_row=True, font_size=9)
-para("Illustrative group cash flow; the formula-driven companion workbook carries the full monthly "
-     "Year-1 detail and the five-year build.", 8.5, italic=True, color=MUTED, space_after=6)
-
+table(["USD", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5"], cf_rows,
+      widths=[2.15, 1.0, 1.0, 1.0, 1.0, 1.0], total_row=True, font_size=8.6)
+bullet([("The Month-13 credit switch — ", True),
+        ("from Year 2, Vestwoods terms convert to 10% down + 90% at 3-month credit, releasing "
+         "~90% of container capital. Closing cash rises every year even while distributing 100% "
+         "of profits — no capital call after Tranche 2.", False)])
+bullet([("Risk stated plainly — ", True),
+        (f"Year 1 depends on the raise: the peak self-funded deficit is USD {K(abs(M.PEAK_DEFICIT))} "
+         "under 100% prepayment. This is a working-capital risk with a contractual exit (the credit "
+         "switch), not a demand risk.", False)])
 doc.add_page_break()
 
 # =====================================================================
 # 7. STAFFING
 # =====================================================================
 h1("7", "Staffing Plan")
-para("Institutional management from day one, shared across both divisions: CEO/MD, CFO and COO "
-     "hired in Month 1, Director of Sales in Month 2, Marketing and HR in Month 3. Headcount reaches "
-     "21 by Month 12 and grows to ~58 by Year 5. Egyptian social insurance at 15% and 4% Egypt sales "
-     "commissions are included. A dedicated houseware sales desk is added within the existing "
-     "structure, keeping Al Reem's incremental personnel cost low.", 10.5, space_after=8)
+para("Institutional management from day one, shared across both divisions: CEO, Financial Manager "
+     "and Operations Manager in Month 1, Sales Manager in Month 2, Marketing and HR in Month 3. "
+     "Two showroom managers run 6th October and New Cairo. Headcount reaches 21 by Month 12 and 55 "
+     "by Year 5. Sales staff earn salary plus 4% commission on Egypt sales across both divisions; "
+     "social insurance at 15% of base is included.", space_after=8)
 staff = [
-    ["Year 1 — launch team (CEO, CFO, COO, Directors, showrooms, warehouse, sales)", "21", "547,515"],
-    ["Year 2 — + BD Director, Logistics, Customer Service, houseware desk", "29", "751,440"],
-    ["Year 3 — + Alexandria branch, installation engineers, analysts", "38", "1,014,200"],
-    ["Year 4 — + B2G/Tenders, C&I sales, IT/CRM, Sudan coordinator", "47", "1,303,160"],
-    ["Year 5 — + Algeria/Libya export desk, service & warehouse scale", "58", "1,935,060"],
+    ["Year 1 — launch team (CEO, managers, 2 showrooms, warehouse, 4 sales, drivers)", "21", K(M.PERSONNEL[0])],
+    ["Year 2 — + logistics coordinator, customer service, technical specialist, 2 sales", "26", K(M.PERSONNEL[1])],
+    ["Year 3 — + Alexandria branch, installation engineers, analysts", "35", K(M.PERSONNEL[2])],
+    ["Year 4 — + B2G/tenders, C&I sales desk, IT/CRM, Sudan coordinator", "44", K(M.PERSONNEL[3])],
+    ["Year 5 — + Libya market manager, field engineers, compliance (senior raises applied)", "55", K(M.PERSONNEL[4])],
 ]
-table(["Year & additions", "Headcount", "Total personnel (USD)"], staff,
-      widths=[4.2, 1.2, 1.6], align_right_from=1, font_size=9)
+table(["Year & additions", "Headcount", "Personnel cost (USD)"], staff,
+      widths=[4.3, 1.0, 1.6], align_right_from=1, font_size=9)
+para("Full role-by-role rosters with salaries and start months are in the Staff Plan sheet of the "
+     "companion workbook.", 9, italic=True, color=MUTED)
 
 # =====================================================================
 # 8. FUNDING & INVESTOR PROPOSAL
 # =====================================================================
 h1("8", "Funding Requirements & Investor Proposal")
 h2("8.1  The ask")
-para("USD 2,000,000 core raise for the combined two-division plan — an expansion of the "
-     "Vestwoods-only requirement to fund Al Reem's opening inventory alongside Vestwoods' Year-1 "
-     "container prepayments. Released in three milestone-gated tranches; band USD 1.0M – 2.5M.",
-     10.5, space_after=6)
-tr_rows = [[name, f"{amt:,},000".replace(",000,000", ",000,000"), timing, purpose]
-           for name, amt, timing, purpose in
-           [(n, a*1000, t, p) for n, a, t, p in M.TRANCHES]]
-# format amounts cleanly
-tr_rows = []
-for n, a, t, p in M.TRANCHES:
-    tr_rows.append([n, f"{a*1000:,.0f}", t, p])
+para("USD 1,500,000 into NORCO Egypt for 50% of its shares — funding requirement band "
+     "USD 1,000,000 – 1,500,000. At the USD 1.0M minimum, the container plan stretches and "
+     "break-even shifts ~2 months; the recommended USD 1.5M funds the full two-division plan "
+     "with buffer.", space_after=6)
+tr_rows = [[n, K(a), t_, p_] for n, a, t_, p_ in M.TRANCHES]
+tr_rows.append(["Total", K(M.RAISE), "", ""])
 table(["Tranche", "USD", "Timing", "Purpose / gate"], tr_rows,
-      widths=[1.5, 0.9, 1.7, 2.5], align_right_from=1, font_size=8.8)
-add_chart("use_of_funds.png", 4.6)
+      widths=[1.35, 0.95, 1.8, 2.9], align_right_from=1, font_size=8.6, total_row=True)
+add_chart("use_of_funds.png", 4.4)
 
-h2("8.2  Investor structures")
-bullet([("Option A — 50% equity: ", True),
-        (f"the investor takes 50% of the company (existing shareholders dilute per Section 2.1). "
-         f"Dividends at 50% of net profit plus the retained stake deliver a {M.OPT_A_IRR*100:.0f}% IRR "
-         f"and {M.OPT_A_MOIC:.1f}x MOIC over five years; dividends alone return "
-         f"{M.OPT_A_DIV_MULTIPLE:.2f}x the capital, before counting a 50% share of a business earning "
-         f"USD {M.NP[4]/1000:.1f}M net profit by Year 5.", False)])
-bullet([("Option B — no equity: ", True),
-        (f"25% net-profit share plus capital redemption at par at the end of Year 5 — "
-         f"{M.OPT_B_IRR*100:.0f}% IRR, {M.OPT_B_MOIC:.2f}x MOIC, with the investor's principal returned.", False)])
+h2("8.2  Investor returns")
+para("Dividend policy: 100% of net profit distributed annually in arrears — the investor receives "
+     "half of every distribution. Valuing the retained 50% stake at a conservative 5× Year-5 net "
+     f"profit adds USD {K(M.INV_TERMINAL)} of terminal value:", space_after=6)
+inv_rows = [
+    ["Capital invested", f"({K(M.RAISE)})", "—", "—", "—", "—", "—"],
+    ["Dividends (50% of prior-year NP)", "—", "—"] + [K(v) for v in M.INV_DIV[1:]],
+    ["Terminal value (50% × 5 × Y5 NP)", "—", "—", "—", "—", "—", K(M.INV_TERMINAL)],
+    ["Net investor cash flow"] + [f"({K(M.RAISE)})", "—"] + [K(M.INV_CF[i]) for i in range(2, 6)],
+]
+table(["USD", "Y0", "Y1", "Y2", "Y3", "Y4", "Y5"], inv_rows,
+      widths=[2.15, 0.95, 0.55, 0.75, 0.75, 0.75, 1.1], total_row=True, font_size=8.6)
 add_chart("returns.png", 6.0)
 add_chart("cumulative_profit.png", 6.0)
 
-h2("8.3  Investor protections (both options)")
-bullet("Milestone-gated tranches — Tranche 2 released only against verified Month-4 milestones "
-       "(containers sold through + Sudan advances received); Tranche 3 against houseware sell-through.")
-bullet("Quarterly management accounts from the formula-driven model; monthly cash and inventory "
-       "reporting across both divisions.")
-bullet("USD-denominated books; Egypt customers on max 60-day terms; Sudan/Libya cash-before-shipment; "
-       "Algeria LC only.")
-bullet("Exclusive Vestwoods agency (with first right of engagement and non-circumvention) assignable "
-       "as security.")
-bullet("Founder pre-investment of USD 14,517 already deployed — operational showroom, licences and "
-       "import permits complete.")
-
+h2("8.3  Investor protections")
+bullet("Tranche 2 released only against verified Month-4 milestones: ≥3 containers sold through and Sudan advances received.")
+bullet("Quarterly management accounts from the formula-driven model; monthly cash and inventory reporting; USD books.")
+bullet("Egypt customers on maximum 60-day terms; Sudan cash-before-shipment; Algeria LC only.")
+bullet("Exclusive Vestwoods agency and the Al Reem (Angola) supply agreement held within the group and assignable as security.")
+bullet("Founder pre-investment of USD 14,517 already deployed; board seat and reserved matters for the investor.")
 doc.add_page_break()
 
 # =====================================================================
 # 9. OPERATIONS, RISKS & MITIGATION
 # =====================================================================
 h1("9", "Operations, Risks & Mitigation")
-bullet([("Supply chain (Vestwoods) — ", True),
-        ("PO (100% prepaid Y1) → factory 15–20 days → sea 18 days → clearance 7–10 days "
-         "(5% duty, 2% GOEIC, 14% VAT recoverable) → 6th October warehouse; roughly one container "
-         "every three weeks in Year 1.", False)])
-bullet([("Supply chain (Al Reem) — ", True),
-        ("mixed 40ft containers from Türkiye on a shorter Mediterranean lead time; higher SKU count "
-         "managed by the shared warehouse team and a simple min/max reorder system.", False)])
+bullet([("Vestwoods supply chain — ", True),
+        ("PO (100% prepaid in Y1) → factory 15–20 days → sea 18 days → clearance 7–10 days (5% duty, "
+         "2% GOEIC, 14% VAT recoverable) → warehouse. Roughly one container every 3–4 weeks in Year 1.", False)])
+bullet([("Al Reem supply chain — ", True),
+        ("group plant in Angola → Alexandria; mixed 69-SKU containers on a simple min/max reorder "
+         "system run by the shared warehouse team.", False)])
 risks = [
-    ["EGP devaluation", "USD-indexed pricing at EGP 53 planning rate (spot ~49–51); 30-day quote validity; USD books"],
+    ["EGP devaluation", "USD-indexed pricing at EGP 53 planning rate; 30-day quote validity; USD books"],
     ["Y1 Vestwoods prepayment exposure", "Haier-backed counterparty; staged POs; credit switch contractually anchored at Month 13"],
+    ["Thin wholesale margins (13%)", "Volume discipline; retail mix defended at 50% in Egypt; commissions tied to sales"],
     ["Raise timing", "Tranche 1 must close before first PO; container schedule flexes with drawdown"],
     ["Customs / GOEIC delays", "Permits issued; broker retained; 45–60 day inventory cover"],
     ["Egypt receivables", "45-day terms; anchor accounts on agreed limits; stop-supply discipline"],
     ["Export instability (Sudan/Libya)", "Cash before shipment; no in-country assets"],
     ["Algeria regime", "Licensed-importer FOB + 100% LC; zero NORCO exposure"],
-    ["Grey-market / local plastics pricing", "5-yr warranty + Cairo service bench (Vestwoods); Türkiye quality + brand (Al Reem)"],
-    ["Two supply chains to manage", "Shared platform, single ERP/inventory system, one management team"],
+    ["Local plastics price wars", "30% group supply discount preserves margin at local-brand price points"],
 ]
 table(["Risk", "Mitigation"], risks, widths=[2.3, 4.4], align_right_from=99, font_size=9)
 
@@ -653,36 +597,34 @@ table(["Risk", "Mitigation"], risks, widths=[2.3, 4.4], align_right_from=99, fon
 # =====================================================================
 h1("10", "Execution Roadmap")
 road = [
-    ["Launch", "M1–M3", "T1 drawn; Vestwoods containers 1–3 prepaid; showroom #2 opens; Sudan buyer "
-     "inspects warehouse stock and places first order; first Al Reem houseware container ordered"],
-    ["Prove", "M4–M6", "T2 drawn; operating break-even confirmed; dealers signed; first Cairo energy "
-     "exhibition; Al Reem retail sell-through established; Algeria negotiation to term sheet"],
-    ["Convert", "M7–M12", "T3 drawn for houseware inventory; second exhibition; Algeria agency signed "
-     "— first LC order ships; Libya distributor due diligence"],
-    ["Compound", "M13–M18", "Vestwoods credit terms activate; Libya first containers; four-market, "
-     "two-division operation running on self-generated cash"],
-    ["Scale", "Y3–Y5", "40 Egypt + 20 Sudan + 7 Libya + 9 Algeria Vestwoods containers by Y5; Al Reem "
-     "houseware scaled across retail & export; CKD assembly evaluation; closing cash ~USD 9.3M"],
+    ["Launch", "M1–M3", "T1 drawn; first Vestwoods POs prepaid; New Cairo showroom opens; first "
+     "Al Reem containers land; Sudan buyer inspects stock and places first order (50% advance)"],
+    ["Prove", "M4–M6", "T2 drawn against milestones; operating break-even (M4); dealers signed; "
+     "Al Reem retail sell-through in both showrooms; Algeria agency to term sheet"],
+    ["Convert", "M7–M12", "Algeria first LC orders ship (M8); cumulative break-even (M8); "
+     "hypermarket listings for Al Reem; Libya distributor due diligence"],
+    ["Compound", "M13–M18", "Vestwoods credit terms activate; Libya first containers; "
+     "full dividend distributions begin"],
+    ["Scale", "Y3–Y5", "41 Vestwoods + 35 Al Reem containers by Y5; Alexandria branch; B2G desk; "
+     f"closing cash USD {K(M.CF_CLOSE[4])}"],
 ]
-table(["Phase", "Timing", "Milestones"], road, widths=[1.2, 1.1, 4.4], align_right_from=99, font_size=9)
+table(["Phase", "Timing", "Milestones"], road, widths=[1.0, 1.0, 4.7], align_right_from=99, font_size=9)
 
 para(space_after=8)
-# Closing statement box
 t = doc.add_table(rows=1, cols=1); t.alignment = WD_TABLE_ALIGNMENT.CENTER
-no_borders(t); c = t.rows[0].cells[0]; shade(c, "0F2942")
-set_cell_margins(c, top=160, bottom=160, left=200, right=200)
+no_borders(t); c = t.rows[0].cells[0]; shade(c, "0F2942"); cell_margins(c, 160, 160, 200, 200)
 p = c.paragraphs[0]; p.alignment = WD_ALIGN_PARAGRAPH.CENTER; p.paragraph_format.space_after = Pt(4)
 run(p, "The opportunity", 11, True, GOLD)
 p2 = c.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER; p2.paragraph_format.space_after = Pt(0)
-run(p2, "USD 2.0M funds a de-risked, two-division distribution platform with an exclusive energy-storage "
-     "agency, a fully-costed houseware range, live export corridors and a founder already invested and "
-     "operational — targeting USD 101M of revenue and USD 13.8M of net profit over five years, at a "
-     "60% investor IRR.", 10.5, False, WHITE)
-
+run(p2, f"USD 1.5M buys half of a two-division platform that is already built: an exclusive "
+     f"energy-storage agency priced 15–26% under the premium brands, a group-owned houseware "
+     f"supply line with locked margins, and four markets in motion — producing "
+     f"USD {M.NP_5YR/1e6:.1f}M of net profit over five years, a {M.INV_IRR*100:.0f}% investor IRR "
+     f"and every dollar of profit distributed.", 10.5, False, WHITE)
 para(space_after=8)
-para("Companion workbook: NORCO_Group_Investor_Model.xlsx — consolidated 5-year P&L, revenue build "
-     "by market and division, cash flow, Al Reem catalogue economics, funding scenarios, investor "
-     "returns and shareholding, all formula-driven.", 9, italic=True, color=MUTED)
+para("Companion workbook: NORCO_Group_Investor_Model.xlsx — key assumptions, pre-op investment, "
+     "pricing reference, staff plan, monthly Year-1 P&L and cash flow, 5-year P&L and cash flow, "
+     "market detail, funding & returns, shareholding and dashboard.", 9, italic=True, color=MUTED)
 
 doc.save(OUT)
 print("Saved", OUT)
