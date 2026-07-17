@@ -84,12 +84,12 @@ def chart_profit_trend():
     ax.bar([i-0.21 for i in x], M.GP, 0.4, label="Gross profit", color=B["teal"], zorder=3)
     ax.bar([i+0.21 for i in x], M.NP, 0.4, label="Net profit", color=B["gold"], zorder=3)
     for i in x:
-        ax.text(i-0.21, M.GP[i]+6e4, m(M.GP[i]), ha="center", va="bottom",
+        ax.text(i-0.21, M.GP[i]+1.2e5, m(M.GP[i]), ha="center", va="bottom",
                 fontsize=8.6, color=B["teal"], fontweight="bold")
-        ax.text(i+0.21, M.NP[i]+6e4, m(M.NP[i]), ha="center", va="bottom",
+        ax.text(i+0.21, M.NP[i]+1.2e5, m(M.NP[i]), ha="center", va="bottom",
                 fontsize=8.6, color=B["gold"], fontweight="bold")
     style(ax); ax.set_xticks(list(x)); ax.set_xticklabels(YRS)
-    ax.set_ylim(0, 3.9e6)
+    ax.set_ylim(0, 7.6e6)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v/1e6:.1f}M"))
     ax.set_title("Group gross profit and net profit", fontsize=13, fontweight="bold",
                  color=B["navy"], loc="left", pad=12)
@@ -105,15 +105,15 @@ def chart_cumulative():
     ax.plot(x, cum, color=B["blue"], linewidth=2.6, marker="o", markersize=7,
             markerfacecolor=B["blue"], markeredgecolor="white", markeredgewidth=1.5, zorder=4)
     ax.axhline(M.RAISE, color=B["orange"], linewidth=1.8, linestyle="--", zorder=3)
-    ax.text(0.05, M.RAISE+8e4, "Capital raised  $1.5M", ha="left",
+    ax.text(0.05, M.RAISE+2.4e5, "Capital raised  $1.0M", ha="left",
             color=B["orange"], fontsize=9.5, fontweight="bold")
     for i in x:
-        ax.text(i, cum[i]+1.1e5, m(cum[i]), ha="center", va="bottom",
+        ax.text(i, cum[i]+3.4e5, m(cum[i]), ha="center", va="bottom",
                 fontsize=9.5, fontweight="bold", color=B["navy"])
     style(ax); ax.set_xticks(list(x)); ax.set_xticklabels(YRS)
-    ax.set_ylim(0, 3.9e6)
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v/1e6:.1f}M"))
-    ax.set_title("Cumulative net profit vs. capital invested — raise earned back inside Year 3",
+    ax.set_ylim(0, 13.6e6)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v/1e6:.0f}M"))
+    ax.set_title("Cumulative net profit vs. capital invested — raise earned back inside Year 1",
                  fontsize=12.2, fontweight="bold", color=B["navy"], loc="left", pad=12)
     save(fig, "cumulative_profit.png")
 
@@ -122,13 +122,13 @@ def chart_use_of_funds():
     fig, ax = plt.subplots(figsize=(5.2, 4.2))
     labels = ["Vestwoods container\nprepayments", "Al Reem opening\ninventory",
               "Setup & showroom\nfit-out", "Opex runway &\nbuffer"]
-    vals = [900, 300, 100, 200]
+    vals = [550, 150, 100, 200]
     cols = [B["blue"], B["aqua"], B["gold"], B["teal"]]
     w = ax.pie(vals, colors=cols, startangle=90, counterclock=False,
                wedgeprops=dict(width=0.42, edgecolor="white", linewidth=2))[0]
-    ax.text(0, 0.08, "$1.5M", ha="center", va="center", fontsize=20, fontweight="bold", color=B["navy"])
+    ax.text(0, 0.08, "$1.0M", ha="center", va="center", fontsize=20, fontweight="bold", color=B["navy"])
     ax.text(0, -0.16, "core raise", ha="center", va="center", fontsize=10, color=B["muted"])
-    leg = [f"{l.replace(chr(10),' ')}  —  ${v}K ({v/15:.0f}%)" for l, v in zip(labels, vals)]
+    leg = [f"{l.replace(chr(10),' ')}  —  ${v}K ({v/10:.0f}%)" for l, v in zip(labels, vals)]
     ax.legend(w, leg, frameon=False, loc="center", bbox_to_anchor=(0.5, -0.14), fontsize=8.5)
     ax.set_title("Use of funds", fontsize=13, fontweight="bold", color=B["navy"], pad=6)
     save(fig, "use_of_funds.png")
@@ -139,14 +139,14 @@ def chart_containers():
     x = range(5)
     vw = M.VW_TOTAL_CONT; ar = M.AR_TOTAL_CONT
     ax.bar([i-0.2 for i in x], vw, 0.38, label="Vestwoods (4 markets)", color=B["navy"], zorder=3)
-    ax.bar([i+0.2 for i in x], ar, 0.38, label="Al Reem Plastics (Egypt + Sudan)", color=B["aqua"], zorder=3)
+    ax.bar([i+0.2 for i in x], ar, 0.38, label="Al Reem Plastics (Egypt, Sudan, Nigeria)", color=B["aqua"], zorder=3)
     for i in x:
         ax.text(i-0.2, vw[i]+0.8, str(vw[i]), ha="center", va="bottom", fontsize=10,
                 fontweight="bold", color=B["navy"])
         ax.text(i+0.2, ar[i]+0.8, str(ar[i]), ha="center", va="bottom", fontsize=10,
                 fontweight="bold", color=B["teal"])
     style(ax); ax.set_xticks(list(x)); ax.set_xticklabels(YRS)
-    ax.set_ylim(0, 48)
+    ax.set_ylim(0, 112)
     ax.set_title("40ft containers shipped per year", fontsize=12.5, fontweight="bold",
                  color=B["navy"], loc="left", pad=12)
     ax.legend(frameon=False, loc="upper left", fontsize=9.5)
@@ -161,14 +161,14 @@ def chart_returns():
     x = range(6)
     ax.bar(x, vals, 0.58, color=cols, zorder=3)
     for i, v in enumerate(vals):
-        off = 6e4 if v >= 0 else -6e4
+        off = 1.8e5 if v >= 0 else -1.8e5
         va = "bottom" if v >= 0 else "top"
         ax.text(i, v+off, m(v), ha="center", va=va, fontsize=9.5, fontweight="bold", color=B["navy"])
     ax.axhline(0, color=B["muted"], linewidth=1)
     style(ax); ax.set_xticks(list(x)); ax.set_xticklabels(labels, fontsize=9)
-    ax.set_ylim(-1.85e6, 3.4e6)
+    ax.set_ylim(-1.7e6, 11.6e6)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v/1e6:.0f}M"))
-    ax.set_title(f"Investor cash flow — 50% of NORCO Egypt for $1.5M  ·  IRR {M.INV_IRR*100:.0f}%  ·  MOIC {M.INV_MOIC:.1f}x",
+    ax.set_title(f"Investor cash flow — 50% of NORCO Egypt for $1.0M  ·  IRR {M.INV_IRR*100:.0f}% (divs-only {M.INV_IRR_DIV*100:.0f}%)  ·  MOIC {M.INV_MOIC:.1f}x",
                  fontsize=12, fontweight="bold", color=B["navy"], loc="left", pad=12)
     save(fig, "returns.png")
 
@@ -181,15 +181,15 @@ def chart_y1_cash():
             markerfacecolor=B["teal"], markeredgecolor="white", markeredgewidth=1.3, zorder=4)
     imin = M.M_CUM.index(min(M.M_CUM))
     ax.annotate(f"min {m(min(M.M_CUM))}", (imin, min(M.M_CUM)),
-                xytext=(imin+0.3, min(M.M_CUM)+2.2e5), fontsize=9, fontweight="bold",
+                xytext=(imin+0.3, min(M.M_CUM)+3.2e5), fontsize=9, fontweight="bold",
                 color=B["orange"], arrowprops=dict(arrowstyle="-", color=B["orange"], lw=1))
     ax.text(11, M.M_CUM[-1]+8e4, m(M.M_CUM[-1]), ha="right", fontsize=10,
             fontweight="bold", color=B["navy"])
     style(ax); ax.set_xticks(list(x))
     ax.set_xticklabels([mo.split("-")[0] for mo in M.MONTHS], fontsize=8.5)
-    ax.set_ylim(0, 1.6e6)
+    ax.set_ylim(0, 2.45e6)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v/1e6:.1f}M"))
-    ax.set_title("Year 1 cash position with the $1.5M raise (monthly)", fontsize=12.5,
+    ax.set_title("Year 1 cash position with the $1.0M raise (monthly)", fontsize=12.5,
                  fontweight="bold", color=B["navy"], loc="left", pad=12)
     save(fig, "y1_cash.png")
 
@@ -219,10 +219,4 @@ if __name__ == "__main__":
     chart_revenue_division(); chart_revenue_market(); chart_profit_trend()
     chart_cumulative(); chart_use_of_funds(); chart_containers()
     chart_returns(); chart_y1_cash(); chart_battery_prices()
-    # cumulative break-even month
-    cum = 0
-    for i, e in enumerate(M.M_EBT):
-        cum += e
-        if cum > 0:
-            print("Cumulative break-even month:", i+1, M.MONTHS[i]); break
     print("All charts generated.")
